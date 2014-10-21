@@ -4,9 +4,9 @@ import (
 	"bufio"
 	"bytes"
 	graphviz "code.google.com/p/gographviz"
-	shellwords "github.com/mattn/go-shellwords"
 	"fmt"
 	"github.com/andlabs/ui"
+	shellwords "github.com/mattn/go-shellwords"
 	"image"
 	"image/draw"
 	"image/png"
@@ -14,8 +14,8 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"runtime"
 	"regexp"
+	"runtime"
 	"strings"
 )
 

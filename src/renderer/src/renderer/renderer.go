@@ -19,6 +19,14 @@ import (
 	"strings"
 )
 
+type HandleR int
+
+const (
+	QUIT HandleR = iota
+	SUCCESS
+	FAILURE
+)
+
 type areaHandler struct {
 	img *image.RGBA
 }
@@ -38,32 +46,39 @@ func findEdge(network *graphviz.Graph, n1 string, n2 string) (uint, *graphviz.Ed
 }
 
 var e2d map[*graphviz.Edge]string
-func handle(cmd string, args []string, network *graphviz.Graph) bool {
+
+func handle(cmd string, args []string, network *graphviz.Graph) (HandleR, string) {
 	switch cmd {
 	case "mark":
 		{
+			if len(args) != 2 {
+				return FAILURE, fmt.Sprintf("Usage: mark <node> <color>")
+			}
 			node := network.Nodes.Lookup[args[0]]
 			if node == nil {
-				fmt.Fprintf(os.Stderr, "Unknown node: %s\n", args[0])
-				return true
+				return FAILURE, fmt.Sprintf("[E] Unknown node: %s", args[0])
 			}
 			node.Attrs["color"] = q(args[1])
 		}
 	case "unmark":
 		{
+			if len(args) != 1 {
+				return FAILURE, fmt.Sprintf("Usage: unmark <node>")
+			}
 			node := network.Nodes.Lookup[args[0]]
 			if node == nil {
-				fmt.Fprintf(os.Stderr, "Unknown node: %s\n", args[0])
-				return true
+				return FAILURE, fmt.Sprintf("[E] Unknown node: %s", args[0])
 			}
 			delete(node.Attrs, "color")
 		}
 	case "send":
 		{
+			if len(args) != 3 {
+				return FAILURE, fmt.Sprintf("Usage: send <from> <to> <msg>")
+			}
 			src, edge := findEdge(network, args[0], args[1])
 			if edge == nil {
-				fmt.Fprintf(os.Stderr, "No edge from node %s to node %s\n", args[0], args[1])
-				return true
+				return FAILURE, fmt.Sprintf("[E] No edge from node %s to node %s", args[0], args[1])
 			}
 
 			edge.Attrs["label"] = q(args[2])
@@ -84,10 +99,12 @@ func handle(cmd string, args []string, network *graphviz.Graph) bool {
 		}
 	case "recv":
 		{
+			if len(args) != 2 {
+				return FAILURE, fmt.Sprintf("Usage: recv <receiver> <sender>")
+			}
 			_, edge := findEdge(network, args[1], args[0])
 			if edge == nil {
-				fmt.Fprintf(os.Stderr, "No edge to node %s from node %s\n", args[0], args[1])
-				return true
+				return FAILURE, fmt.Sprintf("[E] No edge to node %s from node %s", args[0], args[1])
 			}
 			delete(edge.Attrs, "label")
 			delete(edge.Attrs, "color")
@@ -100,13 +117,11 @@ func handle(cmd string, args []string, network *graphviz.Graph) bool {
 			}
 		}
 	case "quit":
-		return false
+		return QUIT, ""
 	default:
-		{
-			fmt.Fprintf(os.Stderr, "Unknown command: %s\n", cmd)
-		}
+		return FAILURE, fmt.Sprintf("[E] Unknown command: %s", cmd)
 	}
-	return true
+	return SUCCESS, "! " + cmd + " " + strings.Join(args, " ")
 }
 func q(i string) string {
 	o := strings.Replace(i, "\\", "\\\\", -1)
@@ -220,21 +235,7 @@ func main() {
 				panic(err)
 			}
 
-			// handle cmd
-			args, _ := shellwords.Parse(strings.TrimSpace(cmd))
-			if !handle(args[0], args[1:], network) {
-				ui.Stop()
-				os.Exit(0)
-			}
-			img, err = plot(network)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Plotting exited with status code %s\n", err)
-				os.Exit(1)
-				return
-			}
-
-			garea.img = img
-			graph.RepaintAll()
+			iterate(network, strings.TrimSpace(cmd))
 		}
 	}()
 
@@ -242,6 +243,41 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func iterate(g *graphviz.Graph, command string) {
+	args, _ := shellwords.Parse(command)
+
+	var ok HandleR
+	var out string
+	switch len(args) {
+	case 0:
+		return
+	case 1:
+		ok, out = handle(args[0], args[0:0], g)
+	default:
+		ok, out = handle(args[0], args[1:], g)
+	}
+
+	if ok == QUIT {
+		ui.Stop()
+		os.Exit(0)
+		return
+	}
+
+	if ok == FAILURE {
+		return
+	}
+
+	img, err := plot(g)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Plotting exited with status code %s\n", err)
+		os.Exit(1)
+		return
+	}
+
+	garea.img = img
+	graph.RepaintAll()
 }
 
 func plot(g *graphviz.Graph) (*image.RGBA, error) {

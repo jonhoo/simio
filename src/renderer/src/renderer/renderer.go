@@ -137,6 +137,8 @@ func (i *areaHandler) Key(ke ui.KeyEvent) bool { return false }
 
 var garea areaHandler
 var graph ui.Area
+var cmdlog ui.TextField
+var cmdline ui.TextField
 
 func main() {
 	if len(os.Args) != 2 {
@@ -206,7 +208,27 @@ func main() {
 		mx := img.Bounds().Max
 		garea = areaHandler{img}
 		graph = ui.NewArea(mx.X, mx.Y, &garea)
-		stack := ui.NewVerticalStack(graph)
+
+		// TODO: cmdlog should be multiline when ui toolkit supports it
+		// Tracked at https://github.com/andlabs/ui/issues/44
+		cmdlog = ui.NewTextField()
+		cmdline = ui.NewTextField()
+		cmdline.OnChanged(func() {
+			// When the user clicks enter
+			// TODO: ui toolkit does not currently support this
+			// Tracked at https://github.com/andlabs/ui/issues/43
+			if strings.HasSuffix(cmdline.Text(), ";") {
+				in := strings.TrimSpace(cmdline.Text())
+				in = strings.TrimSuffix(in, ";")
+				iterate(network, in)
+				go func() {
+					// because we're blocking cmdline
+					cmdline.SetText("")
+				}()
+			}
+		})
+
+		stack := ui.NewVerticalStack(graph, cmdlog, cmdline)
 		stack.SetStretchy(0)
 		done = true
 
@@ -264,6 +286,8 @@ func iterate(g *graphviz.Graph, command string) {
 		os.Exit(0)
 		return
 	}
+
+	cmdlog.SetText(out)
 
 	if ok == FAILURE {
 		return

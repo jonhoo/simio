@@ -1,0 +1,142 @@
+what does the spec contain?
+- transitions
+	- inputs (invoked by another auto)
+	- outputs (invoked on a diff auto)
+	- optional number of outputs before name? special symbols: n
+	- how to choose a transition?
+
+	- special symbols
+		n
+		n-1
+		me
+		from
+- initial value
+
+demo spec:
+
+#
+# Clock IO automaton
+#
+
+Name:
+	Clock
+
+Signature-Input:
+	request
+
+Signature-Internal:
+	tick
+
+Signature-Output:
+	clock(t)
+
+State:
+	counter = 0
+	flag = False
+
+Transition-Name:
+	tick
+Transition-Precondition:
+	return True
+Transition-Effect:
+	counter += 1
+
+Transition-Name:
+	request
+Transition-Effect:
+	flag = True
+
+Transition-Name:
+	clock(t)
+Transition-Precondition:
+	return flag == True
+Transition-Output:
+	t = counter
+Transition-Effect:
+	flag = False
+
+Tasks:
+	tick
+	clock(t)
+
+#
+# Channel IO automaton
+#
+
+Name:
+	Channel
+
+Signature-Input:
+	send(m)
+
+Signature-Output:
+	receive(m)
+
+State:
+	queue = []
+
+Transition-Name:
+	send(m)
+Transition-Effect:
+	queue.append(m)
+
+Transition-Name:
+	receive(m)
+Transition-Precondition:
+	return len(queue) > 0
+Transition-Output:
+	m = queue[0]
+Transition-Effect:
+	queue = queue[1:]
+
+Tasks:
+	receive(m)
+
+#
+# Decider
+#
+
+Name:
+	Decider
+
+Signature-Input:
+	init(v)
+	receive(v), n-1
+
+Signature-Output:
+	decide(v)
+	send(v), n-1
+
+State:
+	queue = [None for i in range(n)]
+
+Transition-Name:
+	init(v)
+Transition-Effect:
+	val[me] = v
+
+Transition-Name:
+	send(v)
+Transition-Precondition:
+	return val[me] is not None
+Transition-Output:
+	v = val[me]
+
+Transition-Name:
+	receive(v)
+Transition-Effect:
+	val[from] = v
+
+Transition-Name:
+	decide(v)
+Transition-Output:
+	v = min(val)
+Transition-Precondition:
+	for i in val:
+		if i is None:
+			return False
+	return True
+
+Tasks:
+	send(v)
+	decide(v)

@@ -14,30 +14,31 @@ Signature-Internal:
 Signature-Output:
 	clock(t)
 
+# XXX -- its lame to make the user prepend "self."s everywhere...
 State:
-	counter = 0
-	flag = False
+	self.counter = 0
+	self.flag = False
 
 Transition-Name:
 	tick
 Transition-Precondition:
 	return True
 Transition-Effect:
-	counter += 1
+	self.counter += 1
 
 Transition-Name:
 	request
 Transition-Effect:
-	flag = True
+	self.flag = True
 
 Transition-Name:
 	clock(t)
 Transition-Precondition:
-	return flag == True
+	return self.flag == True
 Transition-Output:
-	t = counter
+	return self.counter
 Transition-Effect:
-	flag = False
+	self.flag = False
 
 Tasks:
 	tick

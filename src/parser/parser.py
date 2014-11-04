@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import hashlib
+import getopt
 import sys
 
 def lump(pre, post):
@@ -81,18 +82,38 @@ class Parser:
 
     def __init__(self):
         self.state = states.START
-        self.auto = newauto()
+        self.allautos = []
+        self.auto = None
 
-    def addtoret(self, ntd, idts):
+    def addtoret(self, ntd, n, idts):
         print '\t'*idts + 'd = {',
         for k in ntd:
-            print '"' + k + '": %s,' % (ntd[k]),
+            print self.mklit(k) + ': %s,' % (ntd[k]),
 
         print '}'
-        print '\t'*idts + 'ret.append(d)'
+        print '\t'*idts + 'ret[%s] = d' % (self.mklit(n))
 
     def dump(self):
-        get = lambda x: self.auto[x]
+        allclasses = []
+        for i in self.allautos:
+            allclasses.append(self.dumpauto(i))
+
+        self.dumpallc(allclasses)
+
+    def dumpallc(self, allc):
+        print 'allclasses = ',
+        print '{',
+        print ','.join('%s : %s' % (self.mklit(i), i) for i in allc),
+        print '}'
+
+    def dumpauto(self, auto):
+        '''
+        dumps the auto and returns the name of the class for inclusion in the
+        allclass list
+        '''
+
+        get = lambda x: auto[x]
+        mklit = self.mklit
 
         print 'class %s:' % (get('name'))
         print
@@ -101,41 +122,47 @@ class Parser:
         print
         print '\tdef init(self):'
         print ''.join(['\t\t' + i + '\n' for i in get('state')])
-        print
+
         print '\tdef actions(self):'
-        print '\t\tret = []'
+        print '\t\tret = {}'
         for t in get('trans'):
-            prec, arity = self.protoprint(t, 'prec', 2)
-            ntd = {'name': '"' + t.name + '"', 'prec': prec, 'arityprec': arity}
+            prec, arity, atype = self.protoprint(t, 'prec', auto, 2)
+            ntd = {'fullname': mklit(t.name),  'prec': prec, 'arityprec': arity}
+            ntd['atype'] = mklit(atype)
             t.prpre(3)
 
-            eff, arity = self.protoprint(t, 'eff', 2)
+            eff, arity, _ = self.protoprint(t, 'eff', auto, 2)
             ntd['eff'] = eff
             ntd['arityeff'] = arity
             t.preff(3)
 
-            op, arity = self.protoprint(t, 'output', 2)
+            op, arity, _ = self.protoprint(t, 'output', auto, 2)
             ntd['output'] = op
             ntd['arityoutput'] = arity
             t.prout(3)
 
-            self.addtoret(ntd, 2)
+            nameonly = self.noparen(t.name)
+            self.addtoret(ntd, nameonly, 2)
 
         print '\t\treturn ret'
+        print
+        print '\tdef tasks(self):'
+        print '\t\treturn [',
+        print ','.join([mklit(self.noparen(i)) for i in get('tasks')]),
+        print ']'
+        print
+        print
+
+        return get('name')
 
     def enterstate(self, s):
-        if s == states.SIGINP:
+        if s == states.NAME:
             pass
-        elif s == states.SIGOUTP:
-            pass
-        elif s == states.TRANPRE:
-            pass
-        elif s == states.TRANOUT:
-            pass
-        elif s == states.TRANEFF:
-            pass
-        elif s == states.NAME:
-            pass
+
+    def finish(self):
+        if self.auto:
+            self.allautos.append(self.auto)
+        self.auto = newauto()
 
     def go(self, f):
 
@@ -145,10 +172,18 @@ class Parser:
             if line:
                 out = self.parse(line)
 
+        self.finish()
         self.dump()
+        return len(self.allautos)
 
     def leavestate(self, s):
         pass
+
+    def mklit(self, s):
+        return '"' + s + '"'
+
+    def noparen(self, s):
+        return s.split('(')[0]
 
     def parse(self, l):
 
@@ -181,6 +216,7 @@ class Parser:
         return f(l)
 
     def ppname(self, l):
+        self.finish()
         self.auto['name'] = l
 
     def ppnone(self, l):
@@ -188,13 +224,13 @@ class Parser:
 
     def ppsigin(self, l):
         # strip parens and args from sigs
-        self.auto['sigin'].append(l.split('(')[0])
+        self.auto['sigin'].append(self.noparen(l))
 
     def ppsigint(self, l):
-        self.auto['sigint'].append(l.split('(')[0])
+        self.auto['sigint'].append(self.noparen(l))
 
     def ppsigout(self, l):
-        self.auto['sigout'].append(l.split('(')[0])
+        self.auto['sigout'].append(self.noparen(l))
 
     def pptranpre(self, l):
         self.auto['trans'][-1].addpre(l)
@@ -215,7 +251,7 @@ class Parser:
         self.auto['trans'].append(Tran())
         self.auto['trans'][-1].setname(l)
 
-    def protoprint(self, t, ty, idts):
+    def protoprint(self, t, ty, auto, idts):
         '''
         prints the prototype with the correct argument (as needed by the
         simulator) and returns the name of the method for inclusion in the list
@@ -228,29 +264,33 @@ class Parser:
         if ty not in ['prec', 'eff', 'output']:
             raise ValueError('unknown transition type %s' % (ty))
 
-        get = lambda x: self.auto[x]
+        get = lambda x: auto[x]
         n =  t.name
-        lit =  n.split('(')[0]
+        lit =  self.noparen(n)
+        # remove commas and parens so hopefully only args remain
         args = ''.join(''.join(n.split('(')[1:]).split(')')).split(',')
         sigins = get('sigin')
         sigints = get('sigint')
         sigouts = get('sigout')
+        atype = 'internal'
 
         arity = len(args)
 
         if lit in sigins:
             args.insert(0, 'fr')
             arity += 1
+            atype = 'input'
         elif lit in sigouts:
             args.insert(0, 'to')
             arity += 1
+            atype = 'output'
 
         #hs = hashlib.md5(lit).hexdigest()
         #print '\t'*idts + 'def %s_%s%s:' % (lit, hs, ''.join(args))
         lit = '%s_%s' % (lit, ty)
         print '\t'*idts + 'def %s(%s):' % (lit, ','.join(args))
 
-        return lit, arity
+        return lit, arity, atype
 
     def nextstate(self, l):
 
@@ -277,8 +317,16 @@ class Parser:
 
 if __name__ == '__main__':
 
-    p = Parser()
-    with open('test.txt', 'r') as f:
-        p.go(f)
+    tfile = 'test.txt'
 
-    print >> sys.stderr, 'done'
+    args = sys.argv[1:]
+    if args:
+        for o, a in getopt.getopt(args, 'f:'):
+            if o == '-f':
+                tfile = a
+
+    p = Parser()
+    with open(tfile, 'r') as f:
+        nc = p.go(f)
+
+    print >> sys.stderr, 'done. parsed %d classes.' % (nc)

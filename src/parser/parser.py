@@ -268,7 +268,7 @@ class Parser:
         n =  t.name
         lit =  self.noparen(n)
         # remove commas and parens so hopefully only args remain
-        args = ''.join(''.join(n.split('(')[1:]).split(')')).split(',')
+        args = filter(None, ''.join(''.join(n.split('(')[1:]).split(')')).split(','))
         sigins = get('sigin')
         sigints = get('sigint')
         sigouts = get('sigout')

@@ -30,7 +30,7 @@ def getenabled(a):
 
         # the first argument to any of the action methods (eff, prec, output)
         # depends on the action type (atype):
-        #   output    - the id of the sending node
+        #   output    - the id of the receiving node
         #   input     - the id of the sending node
         #   internal  - no assumed arg (internal actions never send/receive
         #       values?)

@@ -321,9 +321,12 @@ if __name__ == '__main__':
 
     args = sys.argv[1:]
     if args:
-        for o, a in getopt.getopt(args, 'f:'):
+        os, args = getopt.getopt(args, 'f:')
+        for o, a in os:
             if o == '-f':
                 tfile = a
+        if len(args) > 0:
+            print "Unknown trailing arguments: %s" % args
 
     p = Parser()
     with open(tfile, 'r') as f:

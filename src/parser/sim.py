@@ -2,6 +2,7 @@
 
 import sys
 
+# XXX: wtf is wtf, and how do I get it?
 import wtf
 
 def log(s):

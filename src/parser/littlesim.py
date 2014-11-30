@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 
+# XXX: wtf is wtf, and how do I get it?
 import wtf
 
 def getenabled(a):

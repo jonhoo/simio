@@ -259,6 +259,7 @@ func main() {
 		// TODO: cmdlog should be multiline when ui toolkit supports it
 		// Tracked at https://github.com/andlabs/ui/issues/44
 		cmdlog = ui.NewTextField()
+		cmdlog.ReadOnly()
 		cmdline = ui.NewTextField()
 		cmdline.OnChanged(func() {
 			// When the user clicks enter

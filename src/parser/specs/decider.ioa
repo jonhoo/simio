@@ -1,0 +1,48 @@
+#
+# Decider
+#
+
+Name:
+	Decider
+
+Signature-Input:
+	init(v)
+	receive(v), n-1
+
+Signature-Output:
+	decide(v)
+	send(v), n-1
+
+State:
+	queue = [None for i in range(n)]
+
+Transition-Name:
+	init(v)
+Transition-Effect:
+	val[me] = v
+
+Transition-Name:
+	send(v)
+Transition-Precondition:
+	return val[me] is not None
+Transition-Output:
+	v = val[me]
+
+Transition-Name:
+	receive(v)
+Transition-Effect:
+	val[from] = v
+
+Transition-Name:
+	decide(v)
+Transition-Output:
+	v = min(val)
+Transition-Precondition:
+	for i in val:
+		if i is None:
+			return False
+	return True
+
+Tasks:
+	send(v)
+	decide(v)

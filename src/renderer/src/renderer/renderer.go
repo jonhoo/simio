@@ -45,7 +45,35 @@ func findEdge(network *graphviz.Graph, n1 string, n2 string) (uint, *graphviz.Ed
 	return 0, nil
 }
 
+func qprocess(edge *graphviz.Edge) {
+	if qlen[edge] == 0 && elabel[edge] == "" {
+		delete(edge.Attrs, "label")
+		delete(edge.Attrs, "color")
+		delete(edge.Attrs, "arrowhead")
+		return
+	}
+
+	edge.Attrs["labelfloat"] = "true"
+
+	if elabel[edge] == "" {
+		edge.Attrs["color"] = "purple"
+		edge.Attrs["label"] = q(fmt.Sprintf("(%d queued)", qlen[edge]))
+		return
+	}
+
+	edge.Attrs["color"] = "blue"
+
+	if qlen[edge] == 0 {
+		edge.Attrs["label"] = q(fmt.Sprintf("%s", elabel[edge]))
+		return
+	}
+
+	edge.Attrs["label"] = q(fmt.Sprintf("%s (%d queued)", elabel[edge], qlen[edge]))
+}
+
 var e2d map[*graphviz.Edge]string
+var elabel map[*graphviz.Edge]string
+var qlen map[*graphviz.Edge]int
 
 func handle(cmd string, args []string, network *graphviz.Graph) (HandleR, string) {
 	switch cmd {
@@ -71,6 +99,20 @@ func handle(cmd string, args []string, network *graphviz.Graph) (HandleR, string
 			}
 			delete(node.Attrs, "color")
 		}
+	case "enqueue":
+		{
+			if len(args) != 2 {
+				return FAILURE, fmt.Sprintf("Usage: enqueue <from> <to>")
+			}
+			_, edge := findEdge(network, args[0], args[1])
+			if edge == nil {
+				return FAILURE, fmt.Sprintf("[E] No edge from node %s to node %s", args[0], args[1])
+			}
+
+			qd, _ := qlen[edge]
+			qlen[edge] = qd + 1
+			qprocess(edge)
+		}
 	case "send":
 		{
 			if len(args) != 3 {
@@ -81,9 +123,11 @@ func handle(cmd string, args []string, network *graphviz.Graph) (HandleR, string
 				return FAILURE, fmt.Sprintf("[E] No edge from node %s to node %s", args[0], args[1])
 			}
 
-			edge.Attrs["label"] = q(args[2])
-			edge.Attrs["color"] = "blue"
-			edge.Attrs["labelfloat"] = "true"
+			elabel[edge] = args[2]
+			if qlen[edge] > 0 {
+				qlen[edge] = qlen[edge] - 1
+			}
+			qprocess(edge)
 
 			_, ok := e2d[edge]
 			if !ok {
@@ -106,9 +150,9 @@ func handle(cmd string, args []string, network *graphviz.Graph) (HandleR, string
 			if edge == nil {
 				return FAILURE, fmt.Sprintf("[E] No edge to node %s from node %s", args[0], args[1])
 			}
-			delete(edge.Attrs, "label")
-			delete(edge.Attrs, "color")
-			delete(edge.Attrs, "arrowhead")
+
+			elabel[edge] = ""
+			qprocess(edge)
 
 			if e2d[edge] == "" {
 				delete(edge.Attrs, "dir")
@@ -153,6 +197,8 @@ func main() {
 	}
 
 	e2d = make(map[*graphviz.Edge]string)
+	elabel = make(map[*graphviz.Edge]string)
+	qlen = make(map[*graphviz.Edge]int)
 
 	var spec []string
 	var dot bytes.Buffer

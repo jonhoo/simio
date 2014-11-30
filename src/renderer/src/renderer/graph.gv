@@ -1,14 +1,18 @@
-graph {
+digraph {
   size="5,5!";
   ratio="fill";
   a1;
   a2;
   a3;
   a4;
-  a1 -- a2;
-  a2 -- a3;
-  a3 -- a1;
-  a3 -- a4;
+  a1 -> a2;
+  a2 -> a1;
+  a2 -> a3;
+  a3 -> a2;
+  a3 -> a1;
+  a1 -> a3;
+  a3 -> a4;
+  a4 -> a3;
 }
 
 start a1

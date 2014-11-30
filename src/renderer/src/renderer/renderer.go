@@ -3,10 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
-	graphviz "code.google.com/p/gographviz"
 	"fmt"
-	"github.com/andlabs/ui"
-	shellwords "github.com/mattn/go-shellwords"
 	"image"
 	"image/draw"
 	"image/png"
@@ -17,6 +14,10 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
+
+	graphviz "code.google.com/p/gographviz"
+	"github.com/andlabs/ui"
+	shellwords "github.com/mattn/go-shellwords"
 )
 
 type HandleR int

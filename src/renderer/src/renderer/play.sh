@@ -24,6 +24,11 @@ mark a4 "purple"
 unmark a2
 recv a4 a3
 unmark a4
+erase
+mark a1 "purple"
+mark a2 "purple"
+mark a3 "purple"
+mark a4 "purple"
 EOF
 
 sleep 2

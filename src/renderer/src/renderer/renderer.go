@@ -161,6 +161,19 @@ func handle(cmd string, args []string, network *graphviz.Graph) (HandleR, string
 				edge.Attrs["dir"] = e2d[edge]
 			}
 		}
+	case "erase":
+		{
+			e2d = make(map[*graphviz.Edge]string)
+			elabel = make(map[*graphviz.Edge]string)
+			qlen = make(map[*graphviz.Edge]int)
+			for _, e := range network.Edges.Edges {
+				qprocess(e)
+				delete(e.Attrs, "dir")
+			}
+			for _, n := range network.Nodes.Nodes {
+				delete(n.Attrs, "color")
+			}
+		}
 	case "quit":
 		return QUIT, ""
 	default:

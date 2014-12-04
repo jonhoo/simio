@@ -188,8 +188,8 @@ class Parser:
 
         for line in f.readlines():
 
-            line = line.strip()
-            if line:
+            if line.strip():
+                line = re.sub('^\t', '', line.rstrip())
                 out = self.parse(line)
 
         self.finish()
@@ -221,7 +221,8 @@ class Parser:
                      states.TRANNAM : self.pptrannam,
                      }
 
-        if l and l[0] == '#':
+        #if l and l[0] == '#':
+        if re.match('^\s*#', l):
             return None
 
         s = self.nextstate(l)
@@ -338,7 +339,7 @@ class Parser:
         d = zip(keywords, dstate)
 
         for k, v in d:
-            if l.startswith(k + ':'):
+            if l.strip().startswith(k + ':'):
                 return v
 
 if __name__ == '__main__':

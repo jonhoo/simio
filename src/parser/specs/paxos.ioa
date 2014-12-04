@@ -1,0 +1,89 @@
+#
+# Paxos IO Automata
+#
+
+Name:
+	Paxos
+
+Signature-Input:
+	# Leader
+	recv-ack(m)
+	# Other
+	proposal(m)
+	decide(m)
+
+Signature-Output:
+	# Leader
+	prepare(m) connect proposal
+	accept(m) connect decide
+	# Other
+	ack(m) connect recv-ack
+
+State:
+	import random
+
+	# For all nodes
+	self.sendq = {n: [] for n in self.nbrs}
+	self.accepted = (0, None)
+
+	# For leaders in phase 1
+	self.ballot = random.random()
+	self.value = random.random()
+	self.enlisted = []
+
+	# For leaders in phase 2
+	self.votes = 0
+
+	# For leaders in phase 3
+	self.won = []
+
+# Leader asks node to vote for proposed value
+Transition-Name:
+	prepare(m)
+Transition-Precondition:
+	return to not in self.enlisted
+Transition-Output:
+	m = self.ballot
+	self.enlisted.push(to)
+
+# Leader asks node to accept value
+Transition-Name:
+	accept(m)
+Transition-Precondition:
+	return self.votes > N/2 and to not in self.won
+Transition-Output:
+	m = (self.ballot, self.value)
+	self.won.push(to)
+
+# Node sends ack to leader
+Transition-Name:
+	ack(m)
+Transition-Precondition:
+	return len(self.sendq[to]) > 0
+Transition-Output:
+	m = self.sendq[to][0]
+Transition-Effect:
+	self.sendq[to].shift()
+
+# Leader receives ack from node
+Transition-Name:
+	recv-ack(m)
+Transition-Effect:
+	self.votes++
+	if m[1] is not None:
+		self.accepted[1] = m[1]
+
+# Node receives proposal from leader
+Transition-Name:
+	proposal(m)
+Transition-Effect:
+	if m > self.accepted[0]:
+		self.accepted[0] = m
+		sendq[from].push(m, self.accepted[1], self.accepted[0])
+
+# Node receives decision from leader
+Transition-Name
+	decide(m)
+Transition-Effect:
+	if m[0] > self.accepted[0]:
+		print "%d accepted value %d" % (self.i, self.accepted[1])

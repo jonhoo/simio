@@ -180,18 +180,19 @@ if __name__ == '__main__':
     n = Net()
     no = chan()
     no.init()
-    uid = 0
-    n.addnode(uid, SNode(0, 'Channel-0', no, no.actions(), no.tasks()))
-    autos[uid] = no
+    n.addnode(no.i, SNode(0, 'Channel-0', no, no.actions(), no.tasks()))
+    autos[no.i] = no
 
     no = chan()
     no.init()
-    uid = 1
-    n.addnode(uid, SNode(1, 'Channel-1', no, no.actions(), no.tasks()))
-    autos[uid] = no
+    n.addnode(no.i, SNode(1, 'Channel-1', no, no.actions(), no.tasks()))
+    autos[no.i] = no
 
-    n.addedge(0, autos[0].connectout, 1, autos[1].connectin)
-    n.addedge(1, autos[1].connectout, StaticID.ENVIRONMENT, 'dur')
+    assert autos[0].i == 0
+    assert autos[1].i == 1
+
+    n.addedge(autos[0].i, autos[0].connectout, 1, autos[1].connectin)
+    n.addedge(autos[1].i, autos[1].connectout, StaticID.ENVIRONMENT, 'dur')
 
     print >> sys.stderr, n.getenabledall()
     print 'sending message...'

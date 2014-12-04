@@ -122,6 +122,8 @@ class Parser:
         print '\t\tpass'
         print
         print '\tdef init(self):'
+        print '\t\tself.i = glob.count'
+        print '\t\tglob.count += 1'
         print ''.join(['\t\t' + i + '\n' for i in get('state')])
 
         print '\tdef actions(self):'
@@ -160,6 +162,8 @@ class Parser:
         return get('name')
 
     def dumpglobal(self):
+        print 'class glob:'
+        print '\tcount = 0'
         print
 
     def enterstate(self, s):

@@ -133,6 +133,7 @@ class Parser:
         print '\t\tglob.count += 1'
         print '\t\tself.N = -1'
         print '\t\tself.weights = {}'
+        print '\t\tself.nbrs = []'
         print ''.join(['\t\t' + i + '\n' for i in get('state')])
 
         print '\tdef actions(self):'

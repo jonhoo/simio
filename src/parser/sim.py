@@ -99,8 +99,10 @@ class SNode:
             if i[0] == dst:
                 return i[1]
 
-    def nbrs(self):
-        return [x for x in self.nbrs]
+    def Nbrs(self):
+        # special ids
+        spec = [-1]
+        return filter(lambda x: x not in spec, [x for x in self.nbrs])
 
 class Net:
 
@@ -157,6 +159,7 @@ class Net:
         for i in self.nodes.values():
             i.obj.N = n
             i.obj.weights = {i:i for i in range(n)}
+            i.obj.nbrs = i.Nbrs()
 
     def getenabledall(self):
         return reduce(lambda x, y: x + y, [self.nodes[x].getenabled() for x in self.nodes])
@@ -210,7 +213,6 @@ if __name__ == '__main__':
     assert autos[0].i == 0
     assert autos[1].i == 1
 
-    print autos[0].connectout
     for o, i in autos[0].connectout.iteritems():
         n.addedge(autos[0].i, o, 1, i)
     for o in autos[1].connectout:

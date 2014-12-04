@@ -2,7 +2,7 @@
 
 import sys
 
-# XXX: wtf is wtf, and how do I get it?
+# use the parser to generate wtf
 import wtf
 
 def log(s):
@@ -167,7 +167,7 @@ class Net:
 
         if not acs:
             log('no enabled actions')
-            return
+            return False
 
         nextaction = acs[0]
         acs = acs[1:]
@@ -177,6 +177,8 @@ class Net:
 
         self.actionstash = acs
         self.doenaction(nextaction)
+
+        return True
 
     def N(self):
         n = len(self.nodes)

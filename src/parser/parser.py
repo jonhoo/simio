@@ -53,6 +53,7 @@ class Tran:
         self.out.append(l)
 
     def prpre(self, idts):
+        self.prprologue(idts)
         if not self.pres:
             print '\t'*idts + 'return False'
 
@@ -60,6 +61,7 @@ class Tran:
             print '\t'*idts + i
 
     def preff(self, idts):
+        self.prprologue(idts)
         if not self.effs:
             print '\t'*idts + 'pass'
 
@@ -67,6 +69,7 @@ class Tran:
             print '\t'*idts + i
 
     def prout(self, idts):
+        self.prprologue(idts)
         # outputs can be omitted
         if not self.out:
             #print '\t'*idts + 'raise Exception("no imp")'
@@ -74,6 +77,9 @@ class Tran:
 
         for i in self.out:
             print '\t'*idts + i
+
+    def prprologue(self, idts):
+        print '\t'*idts + 'i, N = self.i, self.N'
 
     def setname(self, l):
         self.name = l

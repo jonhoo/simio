@@ -2,6 +2,7 @@
 
 import hashlib
 import getopt
+import re
 import sys
 
 def lump(pre, post):
@@ -21,7 +22,7 @@ class states:
     SIGINT  =  10
 
 def newauto():
-    r = {'sigin': [], 'sigint': [], 'sigout': [], 'trans': [], 'state': [], 'tasks':[], 'connectin': '', 'connectout': ''}
+    r = {'sigin': [], 'sigint': [], 'sigout': [], 'trans': [], 'state': [], 'tasks':[], 'connectout': {}}
 
     return r
 
@@ -131,6 +132,7 @@ class Parser:
         print '\t\tself.i = glob.count'
         print '\t\tglob.count += 1'
         print '\t\tself.N = -1'
+        print '\t\tself.weights = {}'
         print ''.join(['\t\t' + i + '\n' for i in get('state')])
 
         print '\tdef actions(self):'
@@ -161,8 +163,7 @@ class Parser:
         print ','.join([mklit(self.noparen(i)) for i in get('tasks')]),
         print ']'
         print
-        print '\tconnectin = "%s"' % (get('connectin'))
-        print '\tconnectout = "%s"' % (get('connectout'))
+        print '\tconnectout = ', get('connectout')
         print
         print
 
@@ -244,8 +245,6 @@ class Parser:
         # strip parens and args from sigs
         n = self.noparen(l)
         self.auto['sigin'].append(n)
-        if 'connect' in l:
-            self.auto['connectin'] = n
 
     def ppsigint(self, l):
         self.auto['sigint'].append(self.noparen(l))
@@ -254,7 +253,9 @@ class Parser:
         n = self.noparen(l)
         self.auto['sigout'].append(n)
         if 'connect' in l:
-            self.auto['connectout'] = n
+            name = re.sub('.*connect ', '', l)
+            name.strip()
+            self.auto['connectout'][n] = name
 
     def pptranpre(self, l):
         self.auto['trans'][-1].addpre(l)

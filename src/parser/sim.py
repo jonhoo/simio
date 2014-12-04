@@ -156,6 +156,7 @@ class Net:
         n = self.N()
         for i in self.nodes.values():
             i.obj.N = n
+            i.obj.weights = {i:i for i in range(n)}
 
     def getenabledall(self):
         return reduce(lambda x, y: x + y, [self.nodes[x].getenabled() for x in self.nodes])
@@ -209,8 +210,11 @@ if __name__ == '__main__':
     assert autos[0].i == 0
     assert autos[1].i == 1
 
-    n.addedge(autos[0].i, autos[0].connectout, 1, autos[1].connectin)
-    n.addedge(autos[1].i, autos[1].connectout, StaticID.ENVIRONMENT, 'dur')
+    print autos[0].connectout
+    for o, i in autos[0].connectout.iteritems():
+        n.addedge(autos[0].i, o, 1, i)
+    for o in autos[1].connectout:
+        n.addedge(autos[1].i, o, StaticID.ENVIRONMENT, 'dur')
 
     n.simstarting()
     print >> sys.stderr, n.getenabledall()

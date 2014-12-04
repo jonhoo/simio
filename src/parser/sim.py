@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 import sys
 
@@ -175,16 +175,23 @@ class Net:
 
 if __name__ == '__main__':
 
+    autos = {}
     chan = wtf.allclasses['Channel']
     n = Net()
     no = chan()
     no.init()
-    n.addnode(0, SNode(0, 'Channel-0', no, no.actions(), no.tasks()))
+    uid = 0
+    n.addnode(uid, SNode(0, 'Channel-0', no, no.actions(), no.tasks()))
+    autos[uid] = no
+
     no = chan()
     no.init()
-    n.addnode(1, SNode(1, 'Channel-1', no, no.actions(), no.tasks()))
-    n.addedge(0, 'receive', 1, 'send')
-    n.addedge(1, 'receive', StaticID.ENVIRONMENT, 'dur')
+    uid = 1
+    n.addnode(uid, SNode(1, 'Channel-1', no, no.actions(), no.tasks()))
+    autos[uid] = no
+
+    n.addedge(0, autos[0].connectout, 1, autos[1].connectin)
+    n.addedge(1, autos[1].connectout, StaticID.ENVIRONMENT, 'dur')
 
     print >> sys.stderr, n.getenabledall()
     print 'sending message...'

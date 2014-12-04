@@ -52,10 +52,10 @@ Name:
 	Channel
 
 Signature-Input:
-	send(m)
+	send(m) connect
 
 Signature-Output:
-	receive(m)
+	receive(m) connect
 
 State:
 	self.queue = []

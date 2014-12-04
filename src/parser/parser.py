@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 import hashlib
 import getopt
@@ -21,7 +21,7 @@ class states:
     SIGINT  =  10
 
 def newauto():
-    r = {'sigin': [], 'sigint': [], 'sigout': [], 'trans': [], 'state': [], 'tasks':[]}
+    r = {'sigin': [], 'sigint': [], 'sigout': [], 'trans': [], 'state': [], 'tasks':[], 'connectin': '', 'connectout': ''}
 
     return r
 
@@ -94,6 +94,7 @@ class Parser:
         print '\t'*idts + 'ret[%s] = d' % (self.mklit(n))
 
     def dump(self):
+        self.dumpglobal()
         allclasses = []
         for i in self.allautos:
             allclasses.append(self.dumpauto(i))
@@ -151,9 +152,15 @@ class Parser:
         print ','.join([mklit(self.noparen(i)) for i in get('tasks')]),
         print ']'
         print
+        print '\tconnectin = "%s"' % (get('connectin'))
+        print '\tconnectout = "%s"' % (get('connectout'))
+        print
         print
 
         return get('name')
+
+    def dumpglobal(self):
+        print
 
     def enterstate(self, s):
         if s == states.NAME:
@@ -224,13 +231,19 @@ class Parser:
 
     def ppsigin(self, l):
         # strip parens and args from sigs
-        self.auto['sigin'].append(self.noparen(l))
+        n = self.noparen(l)
+        self.auto['sigin'].append(n)
+        if 'connect' in l:
+            self.auto['connectin'] = n
 
     def ppsigint(self, l):
         self.auto['sigint'].append(self.noparen(l))
 
     def ppsigout(self, l):
-        self.auto['sigout'].append(self.noparen(l))
+        n = self.noparen(l)
+        self.auto['sigout'].append(n)
+        if 'connect' in l:
+            self.auto['connectout'] = n
 
     def pptranpre(self, l):
         self.auto['trans'][-1].addpre(l)

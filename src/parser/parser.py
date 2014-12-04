@@ -124,6 +124,7 @@ class Parser:
         print '\tdef init(self):'
         print '\t\tself.i = glob.count'
         print '\t\tglob.count += 1'
+        print '\t\tself.N = -1'
         print ''.join(['\t\t' + i + '\n' for i in get('state')])
 
         print '\tdef actions(self):'

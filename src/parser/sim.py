@@ -31,7 +31,7 @@ class SNode:
     def __init__(self, gid, name, obj, ac, ta):
         self.myid = gid
         self.name = name
-        self.o = obj
+        self.obj = obj
         self.actions = ac
         self.tasks = ta
         # a map of action names to pairs of (i, j) where i is the destination
@@ -152,6 +152,11 @@ class Net:
         torender('send %s %s %s' % (sn.name, dn.name, ea.aname))
         torender('recv %s %s %s' % (dn.name, sn.name, inactname))
 
+    def simstarting(self):
+        n = self.N()
+        for i in self.nodes.values():
+            i.obj.N = n
+
     def getenabledall(self):
         return reduce(lambda x, y: x + y, [self.nodes[x].getenabled() for x in self.nodes])
 
@@ -172,6 +177,17 @@ class Net:
 
         self.actionstash = acs
         self.doenaction(nextaction)
+
+    def N(self):
+        n = len(self.nodes)
+        # print warning if fishy stuff
+        eyes = [x.obj.i for x in self.nodes.values()]
+        ns = range(n+1)
+        for i in eyes:
+            if i not in ns:
+                print >> sys.stderr, '*Warning: missing an ID'
+
+        return n
 
 if __name__ == '__main__':
 
@@ -194,6 +210,7 @@ if __name__ == '__main__':
     n.addedge(autos[0].i, autos[0].connectout, 1, autos[1].connectin)
     n.addedge(autos[1].i, autos[1].connectout, StaticID.ENVIRONMENT, 'dur')
 
+    n.simstarting()
     print >> sys.stderr, n.getenabledall()
     print 'sending message...'
     n.nodes[0].actions['send']['eff'](StaticID.ENVIRONMENT, 'duh hello!')

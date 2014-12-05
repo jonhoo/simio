@@ -1,8 +1,9 @@
 #!/usr/bin/env python2
 
-import gv
-import sys
 import getopt
+import gv
+import random
+import sys
 
 # use the parser to generate wtf
 import wtf
@@ -235,8 +236,8 @@ class Net:
             log('no enabled actions')
             return False
 
-        nextaction = acs[0]
-        acs = acs[1:]
+        nextaction = random.choice(acs)
+
         # remove all enabled actions from the node that owns nextaction since
         # execution of nextaction may disable the other enabled actions
         acs = filter(lambda x: x.src != nextaction.src, acs)

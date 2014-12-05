@@ -63,7 +63,7 @@ Transition-Precondition:
 Transition-Output:
 	m = self.sendq[to][0]
 Transition-Effect:
-	self.sendq[to].shift()
+	self.sendq[to].popleft()
 
 # Leader receives ack from node
 Transition-Name:
@@ -87,3 +87,8 @@ Transition-Name
 Transition-Effect:
 	if m[0] > self.accepted[0]:
 		print "%d accepted value %d" % (self.i, self.accepted[1])
+
+Tasks:
+	prepare(m)
+	accept(m)
+	ack(m)

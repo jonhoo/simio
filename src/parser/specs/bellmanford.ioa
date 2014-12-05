@@ -29,7 +29,6 @@ Transition-Effect:
 	if self.dist is None or act < self.dist:
 		self.dist = m[1]
 		self.parent = m[0]
-	print("all the nodes are" + N)
 
 Tasks:
 	send(m)

@@ -348,9 +348,12 @@ def btest(graphfile):
 
     #print n
     n.simstarting(lambda x: torender(x))
-    n.manualinput(0, 'read', 0, 'herro there!')
+    #n.manualinput(0, 'read', 0, 'herro there!')
+    i = 0
     while n.step():
-        pass
+        i += 1
+	if i > 1000:
+		break
 
     log('done')
 

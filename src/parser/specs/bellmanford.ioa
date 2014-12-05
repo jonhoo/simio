@@ -13,21 +13,22 @@ Signature-Output:
 
 State:
 	self.parent = None
-	self.dist = self.i == 0 and 0 or None
+	self.dist = 0 if self.i == 0 else None
 
 Transition-Name:
 	send(m)
 Transition-Precondition:
 	return self.dist is not None
 Transition-Output:
-	m = (self.i, self.dist)
+	print self.i, self.dist
+	return (self.i, self.dist)
 
 Transition-Name:
 	receive(m)
 Transition-Effect:
 	act = m[1] + self.weights[m[0]]
 	if self.dist is None or act < self.dist:
-		self.dist = m[1]
+		self.dist = act
 		self.parent = m[0]
 
 Tasks:

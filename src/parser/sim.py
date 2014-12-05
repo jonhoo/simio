@@ -203,7 +203,7 @@ class Net:
 	# don't print send/recv twice
 	if dn.ischannel():
 		torender('send %s %s %s' % (srcname, dstname, ea.aname))
-		torender('recv %s %s %s' % (dstname, srcname, inactname))
+		torender('recv %s %s' % (dstname, srcname))
 
     def simstarting(self, m):
         n = self.N()

@@ -41,11 +41,18 @@ class SNode:
         self.obj = obj
         self.actions = ac
         self.tasks = ta
+        self.weights = {}
+
+        # channel only fields
         self.chanid = None
+
         # a map of action names to pairs of (i, j) where i is the destination
         # id and j is the action of the node corresponding to destination id
         self.omap = {}
         self.nbrs = {}
+
+    def addweight(self, to, weight):
+        self.weights[to.myid] = weight
 
     def conn_output(self, srcac, destsn, dstac):
         if srcac not in self.actions:
@@ -210,7 +217,7 @@ class Net:
         n = self.N()
         for i in self.nodes.values():
             i.obj.N = n
-            i.obj.weights = {i:i for i in range(n)}
+            i.obj.weights = i.weights
             i.obj.nbrs = i.Nbrs()
             i.obj.markcb = m
 
@@ -294,6 +301,8 @@ class Nbuilder:
         while e:
             f = net.node(net.nodeid(gv.nameof(gv.tailof(e))))
             t = net.node(net.nodeid(gv.nameof(gv.headof(e))))
+            w = gv.getv(e, 'weight')
+            w = float(w) if w else 0
 
             for outp, inp in f.obj.connectout.iteritems():
                 # insert channel
@@ -305,6 +314,7 @@ class Nbuilder:
                     cin = c.obj.connectout.values()[0]
                     net.addedge(f, outp, c, cin)
                     net.addedge(c, cout, t, inp)
+                    f.addweight(t, w)
                 else:
                     raise ValueError('no imp')
 

@@ -60,6 +60,9 @@ class SNode:
 
         self.nbrs[destsn.tranid('out')] = True
 
+    def ischannel(self):
+        return self.chanid
+
     def getenabled(self):
         '''
         returns list of EnActions. if the atype of the action is 'output', dest
@@ -120,7 +123,7 @@ class SNode:
         if d not in ['in', 'out']:
             s = 'bad direction for tranid: %s' % (d)
             raise ValueError(s)
-        if self.chanid:
+        if self.ischannel():
             if d == 'in':
                 return self.chanid[0]
             else:
@@ -195,8 +198,12 @@ class Net:
         args = [self.node(ea.src).tranid('in')] + [output]
         apply(inaction['eff'], args)
 
-        torender('send %s %s %s' % (sn.name, dn.name, ea.aname))
-        torender('recv %s %s %s' % (dn.name, sn.name, inactname))
+	dstname = self.node(dn.tranid('out')).name
+	srcname = self.node(sn.tranid('in')).name
+	# don't print send/recv twice
+	if dn.ischannel():
+		torender('send %s %s %s' % (srcname, dstname, ea.aname))
+		torender('recv %s %s %s' % (dstname, srcname, inactname))
 
     def simstarting(self, m):
         n = self.N()

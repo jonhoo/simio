@@ -1,0 +1,96 @@
+#
+# Peterson's leader election IO Automata
+#
+
+Name:
+	Peterson
+
+Signature-Input:
+	receive(m)
+
+Signature-Output:
+	send(m) connect receive
+
+State:
+	self.phase = 0
+	self.cid = self.i
+	self.active = True
+	self.sendq = [(self.phase, self.cid, 2)]
+	self.received = []
+	self.probe1 = None
+	self.probe2 = None
+	self.waitfor = self.phase
+
+# Send whatever is on our send queue
+Transition-Name:
+	send(m)
+Transition-Precondition:
+	return len(self.sendq) > 0
+Transition-Output:
+	m = self.sendq[0]
+Transition-Effect:
+	self.sendq.shift()
+
+# Forward a message if we're not active, or buffer it otherwise
+Transition-Name:
+	receive(m)
+Transition-Effect:
+	if self.active:
+		self.received.push(m)
+	else:
+		self.sendq.push(m)
+
+# Process a buffered message
+Transition-Name:
+	process
+Transition-Precondition:
+	# If we're not active, nothing here matters
+	if not self.active:
+		return False
+	# If there's nothing to process, nothing matters
+	if len(self.received) == 0:
+		return False
+	for m in self.received:
+		if m[0] == self.waitfor:
+			return True
+	return False
+Transition-Effect:
+	# Extract the first message for this phase
+	rm = None
+	for i, m in self.received:
+		if m[0] == self.waitfor:
+			rm = m
+			break
+	self.received.remove(rm)
+
+	# Pass along one-step probe
+	if m[2] == 2:
+		self.sendq.push((m[0], m[1], m[2]-1))
+
+	# Record first probe; wait for second
+	if self.probe1 is None:
+		self.probe1 = m[1]
+		return
+
+	# Record second probe
+	if self.probe2 is None:
+		self.probe2 = m[1]
+
+	# Our token passed around, we win!
+	if self.probe1 == self.cid:
+		print(self.i, "is the leader")
+	# We saw a winning token, adopt it and start a new phase
+	elif self.probe1 > self.cid and self.probe1 > self.probe2:
+		self.cid = self.probe2
+		self.phase++
+		self.sendq.push(self.phase, self.cid, 2)]
+		self.waitfor = self.phase
+	# We didn't win; give up... Someone else will get our id
+	else:
+		self.active = False
+		self.sendq.extend(self.received)
+		self.received = []
+
+Tasks:
+	send(m)
+	process

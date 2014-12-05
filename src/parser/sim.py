@@ -2,6 +2,7 @@
 
 import gv
 import sys
+import getopt
 
 # use the parser to generate wtf
 import wtf
@@ -326,11 +327,11 @@ def ioinit():
     # so prints go to stderr
     sys.stdout = sys.stderr
 
-def btest():
+def btest(graphfile):
 
     ioinit()
 
-    fn = 'graph.gv'
+    fn = graphfile
     log('reading %s...' % (fn))
     n = Nbuilder(fn).go()
 
@@ -376,5 +377,16 @@ def maintest():
     print n.getenabledall()
 
 if __name__ == '__main__':
-    btest()
+
+    graphfile = 'graph.gv'
+    args = sys.argv[1:]
+    if args:
+        os, args = getopt.getopt(args, 'g:')
+        for o, a in os:
+            if o == '-g':
+                graphfile = a
+        if len(args) > 0:
+            print "Unknown trailing arguments: %s" % args
+
+    btest(graphfile)
     #maintest()

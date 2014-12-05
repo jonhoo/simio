@@ -87,6 +87,8 @@ Transition-Name
 Transition-Effect:
 	if m[0] > self.accepted[0]:
 		print "%d accepted value %d" % (self.i, self.accepted[1])
+		# Indicate that we're done
+		self.markcb("green")
 
 Tasks:
 	prepare(m)

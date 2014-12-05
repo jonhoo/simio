@@ -79,6 +79,8 @@ Transition-Effect:
 	# Our token passed around, we win!
 	if self.probe1 == self.cid:
 		print(self.i, "is the leader")
+		# Show that we're the leader
+		self.markcb("green")
 	# We saw a winning token, adopt it and start a new phase
 	elif self.probe1 > self.cid and self.probe1 > self.probe2:
 		self.cid = self.probe2

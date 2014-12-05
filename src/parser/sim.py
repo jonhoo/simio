@@ -154,12 +154,13 @@ class Net:
         torender('send %s %s %s' % (sn.name, dn.name, ea.aname))
         torender('recv %s %s %s' % (dn.name, sn.name, inactname))
 
-    def simstarting(self):
+    def simstarting(self, m):
         n = self.N()
         for i in self.nodes.values():
             i.obj.N = n
             i.obj.weights = {i:i for i in range(n)}
             i.obj.nbrs = i.Nbrs()
+            i.obj.markcb = m
 
     def getenabledall(self):
         return reduce(lambda x, y: x + y, [self.nodes[x].getenabled() for x in self.nodes])
@@ -218,7 +219,7 @@ if __name__ == '__main__':
     for o in autos[1].connectout:
         n.addedge(autos[1].i, o, StaticID.ENVIRONMENT, 'dur')
 
-    n.simstarting()
+    n.simstarting(lambda x: torender(x))
     print >> sys.stderr, n.getenabledall()
     print 'sending message...'
     n.nodes[0].actions['send']['eff'](StaticID.ENVIRONMENT, 'duh hello!')

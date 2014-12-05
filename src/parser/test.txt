@@ -1,79 +1,56 @@
 #
-# Clock IO automaton
+# dur
 #
 
 Name:
-	Clock
+	Dummy
 
 Signature-Input:
-	request
+	read(m)
 
 Signature-Internal:
 	tick
 
 Signature-Output:
-	clock(t)
+	write(m) connect read
 
-# XXX -- its lame to make the user prepend "self."s everywhere...
 State:
+	# map of message queues
+	self.msgs = {}
 	self.counter = 0
-	self.flag = False
+	self.mcount = 0
 
+# dummy method
 Transition-Name:
 	tick
 Transition-Precondition:
-	return True
+	return False
 Transition-Effect:
 	self.counter += 1
 
 Transition-Name:
-	request
+	read(m)
 Transition-Effect:
-	self.flag = True
+	d = self.nbrs[0]
+	print 'im %d, sending to %d' % (i, self.nbrs[0])
+	if self.msgs.has_key(d):
+		self.msgs[d].append(m)
+	else:
+		self.msgs[d] = [m]
 
 Transition-Name:
-	clock(t)
+	write(m)
 Transition-Precondition:
-	return self.flag == True
+	if self.mcount > 10:
+		return False
+	if self.msgs.has_key(to):
+		return len(self.msgs[to])
+	return False
 Transition-Output:
-	return self.counter
+	return self.msgs[to][0]
 Transition-Effect:
-	self.flag = False
+	self.msgs[to] = self.msgs[to][1:]
+	self.mcount += 1
 
 Tasks:
-	tick
-	clock(t)
-
-#
-# Channel IO automaton
-#
-
-Name:
-	Channel
-
-Signature-Input:
-	send(m)
-
-Signature-Output:
-	receive(m) connect send
-
-State:
-	self.queue = []
-
-Transition-Name:
-	send(m)
-Transition-Effect:
-	self.queue.append(m)
-
-Transition-Name:
-	receive(m)
-Transition-Precondition:
-	return len(self.queue) > 0
-Transition-Output:
-	return self.queue[0]
-Transition-Effect:
-	self.queue = self.queue[1:]
-
-Tasks:
-	receive(m)
-
+	write(m)

@@ -1,0 +1,33 @@
+#
+# Channel IO automaton
+#
+
+Name:
+	Channel
+
+Signature-Input:
+	send(m)
+
+Signature-Output:
+	receive(m) connect send
+
+State:
+	self.queue = []
+
+Transition-Name:
+	send(m)
+Transition-Effect:
+	self.queue.append(m)
+
+Transition-Name:
+	receive(m)
+Transition-Precondition:
+	return len(self.queue) > 0
+Transition-Output:
+	return self.queue[0]
+Transition-Effect:
+	self.queue = self.queue[1:]
+
+Tasks:
+	receive(m)
+

@@ -22,7 +22,8 @@ class states:
     SIGINT  =  10
 
 def newauto():
-    r = {'sigin': [], 'sigint': [], 'sigout': [], 'trans': [], 'state': [], 'tasks':[], 'connectout': {}}
+    r = {'sigin': [], 'sigint': [], 'sigout': [], 'trans': [],
+         'state': [], 'tasks':[], 'connectout': {}}
 
     return r
 

@@ -5,12 +5,18 @@ digraph {
   a2;
   a3;
   a4;
+
   a1 -> a2 [weight = 4]
   a2 -> a1 [weight = 4]
+
   a2 -> a3 [weight = 2]
   a3 -> a2 [weight = 2]
+
   a3 -> a4 [weight = 9]
   a4 -> a3 [weight = 9]
+
+  a1 -> a4 [weight = 1]
+  a4 -> a1 [weight = 1]
 }
 
 start a1

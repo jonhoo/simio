@@ -7,7 +7,7 @@ Name:
 
 Signature-Input:
 	# Leader
-	recv-ack(m)
+	recv_ack(m)
 	# Other
 	proposal(m)
 	decide(m)
@@ -17,7 +17,7 @@ Signature-Output:
 	prepare(m) connect proposal
 	accept(m) connect decide
 	# Other
-	ack(m) connect recv-ack
+	ack(m) connect recv_ack
 
 State:
 	import random
@@ -67,7 +67,7 @@ Transition-Effect:
 
 # Leader receives ack from node
 Transition-Name:
-	recv-ack(m)
+	recv_ack(m)
 Transition-Effect:
 	self.votes++
 	if m[1] is not None:

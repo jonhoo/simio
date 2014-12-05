@@ -5,11 +5,15 @@ import sys
 # use the parser to generate wtf
 import wtf
 
+class glob:
+    render = None
+    console = None
+
 def log(s):
-    print >> sys.stderr, '%s' % (s)
+    print >> glob.console, '%s' % (s)
 
 def torender(s):
-    print >> sys.stdout, '%s' % (s)
+    print >> glob.render, '%s' % (s)
 
 # Special IDs used to catch unconnected output actions
 class StaticID:
@@ -192,11 +196,16 @@ class Net:
         ns = range(n+1)
         for i in eyes:
             if i not in ns:
-                print >> sys.stderr, '*Warning: missing an ID'
+                print '*Warning: missing an ID'
 
         return n
 
 if __name__ == '__main__':
+
+    glob.console = sys.stderr
+    glob.render = sys.stdout
+    # so prints go to stderr
+    sys.stdout = sys.stderr
 
     autos = {}
     chan = wtf.allclasses['Channel']
@@ -220,11 +229,11 @@ if __name__ == '__main__':
         n.addedge(autos[1].i, o, StaticID.ENVIRONMENT, 'dur')
 
     n.simstarting(lambda x: torender(x))
-    print >> sys.stderr, n.getenabledall()
+    print n.getenabledall()
     print 'sending message...'
     n.nodes[0].actions['send']['eff'](StaticID.ENVIRONMENT, 'duh hello!')
-    print >> sys.stderr, n.getenabledall()
+    print n.getenabledall()
     n.step()
-    print >> sys.stderr, n.getenabledall()
+    print n.getenabledall()
     n.step()
-    print >> sys.stderr, n.getenabledall()
+    print n.getenabledall()

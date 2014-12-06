@@ -222,6 +222,7 @@ class Net:
             i.obj.weights = i.weights
             i.obj.nbrs = i.Nbrs()
             i.obj.markcb = m
+            i.obj.init()
 
         # connect outputless actions to environment
 
@@ -291,7 +292,6 @@ class Nbuilder:
         n = gv.firstnode(g)
         while n:
             auto = allclass[k]()
-            auto.init()
             name = gv.nameof(n)
             idd = auto.i
             net.addnode(idd, SNode(idd, name, auto, \

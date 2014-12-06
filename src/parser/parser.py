@@ -128,15 +128,14 @@ class Parser:
         print 'class %s:' % (get('name'))
         print
         print '\tdef __init__(self):'
-        print '\t\tpass'
-        print
-        print '\tdef init(self):'
         print '\t\tself.i = glob.count'
         print '\t\tglob.count += 1'
         print '\t\tself.N = -1'
         print '\t\tself.weights = {}'
         print '\t\tself.nbrs = []'
         print '\t\tself.markcb = None'
+        print
+        print '\tdef init(self):'
         print ''.join(['\t\t' + i + '\n' for i in get('state')])
 
         print '\tdef mark(self, m):'

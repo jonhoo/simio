@@ -4,19 +4,16 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"image"
-	"image/draw"
-	"image/png"
 	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"regexp"
 	"runtime"
 	"strings"
 
 	graphviz "code.google.com/p/gographviz"
-	"github.com/andlabs/ui"
 	shellwords "github.com/mattn/go-shellwords"
 )
 
@@ -27,10 +24,6 @@ const (
 	SUCCESS
 	FAILURE
 )
-
-type areaHandler struct {
-	img *image.RGBA
-}
 
 func findEdge(network *graphviz.Graph, n1 string, n2 string) (uint, *graphviz.Edge) {
 	n1e := network.Edges.SrcToDsts[n1]
@@ -187,17 +180,6 @@ func q(i string) string {
 	return "\"" + o + "\""
 }
 
-func (i *areaHandler) Paint(rect image.Rectangle) *image.RGBA {
-	return i.img.SubImage(rect).(*image.RGBA)
-}
-func (i *areaHandler) Mouse(me ui.MouseEvent)  {}
-func (i *areaHandler) Key(ke ui.KeyEvent) bool { return false }
-
-var garea areaHandler
-var graph ui.Area
-var cmdlog ui.TextField
-var cmdline ui.TextField
-
 func main() {
 	if len(os.Args) != 2 {
 		fmt.Fprintf(os.Stderr, "No network graph description given\n")
@@ -258,73 +240,23 @@ func main() {
 		n.Attrs.Add("color", "red")
 	}
 
-	img, err := plot(network)
+	err = plot(network)
 	if err != nil {
 		panic(err)
 	}
 
-	done := false
-	go ui.Do(func() {
-		mx := img.Bounds().Max
-		garea = areaHandler{img}
-		graph = ui.NewArea(mx.X, mx.Y, &garea)
+	in := bufio.NewReader(os.Stdin)
+	for {
+		cmd, err := in.ReadString('\n')
 
-		// TODO: cmdlog should be multiline when ui toolkit supports it
-		// Tracked at https://github.com/andlabs/ui/issues/44
-		cmdlog = ui.NewTextField()
-		cmdlog.ReadOnly()
-		cmdline = ui.NewTextField()
-		cmdline.OnChanged(func() {
-			// When the user clicks enter
-			// TODO: ui toolkit does not currently support this
-			// Tracked at https://github.com/andlabs/ui/issues/43
-			if strings.HasSuffix(cmdline.Text(), ";") {
-				in := strings.TrimSpace(cmdline.Text())
-				in = strings.TrimSuffix(in, ";")
-				iterate(network, in)
-				go func() {
-					// because we're blocking cmdline
-					cmdline.SetText("")
-				}()
+		if err != nil {
+			if err == io.EOF {
+				os.Exit(0)
 			}
-		})
-
-		stack := ui.NewVerticalStack(graph, cmdlog, cmdline)
-		stack.SetStretchy(0)
-		done = true
-
-		w := ui.NewWindow("Simio", mx.X, mx.Y, stack)
-		w.OnClosing(func() bool {
-			ui.Stop()
-			return true
-		})
-		w.Show()
-	})
-
-	go func() {
-		for !done {
-			runtime.Gosched()
+			panic(err)
 		}
 
-		in := bufio.NewReader(os.Stdin)
-		for {
-			cmd, err := in.ReadString('\n')
-
-			if err != nil {
-				if err == io.EOF {
-					ui.Stop()
-					os.Exit(0)
-				}
-				panic(err)
-			}
-
-			iterate(network, strings.TrimSpace(cmd))
-		}
-	}()
-
-	err = ui.Go()
-	if err != nil {
-		panic(err)
+		iterate(network, strings.TrimSpace(cmd))
 	}
 }
 
@@ -342,50 +274,64 @@ func iterate(g *graphviz.Graph, command string) {
 		ok, out = handle(args[0], args[1:], g)
 	}
 
+	fmt.Println(out)
+
 	if ok == QUIT {
-		ui.Stop()
 		os.Exit(0)
 		return
 	}
-
-	cmdlog.SetText(out)
 
 	if ok == FAILURE {
 		return
 	}
 
-	img, err := plot(g)
+	err := plot(g)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Plotting exited with status code %s\n", err)
 		os.Exit(1)
 		return
 	}
 
-	garea.img = img
-	graph.RepaintAll()
+	// Redraw img
 }
 
-func plot(g *graphviz.Graph) (*image.RGBA, error) {
-	var buf bytes.Buffer
+var started = false
+
+func plot(g *graphviz.Graph) error {
+	w, e := os.Create("next.svg")
+	if e != nil {
+		return e
+	}
+
 	var ebuf bytes.Buffer
-	cmd := exec.Command("fdp", "-Tpng")
+	cmd := exec.Command("fdp", "-Tsvg")
 	cmd.Stdin = bytes.NewReader([]byte(g.String()))
-	cmd.Stdout = bufio.NewWriter(&buf)
+	cmd.Stdout = w
 	cmd.Stderr = bufio.NewWriter(&ebuf)
 
 	cmde := cmd.Run()
+	w.Close()
 	if cmde != nil {
 		fmt.Fprintf(os.Stderr, "Failed to plot graph:\n---\n%s---\n%s", g.String(), ebuf.String())
-		return nil, cmde
+		return cmde
 	}
 
-	i, e := png.Decode(bufio.NewReader(&buf))
+	e = os.Rename("next.svg", "current.svg")
 	if e != nil {
-		return nil, e
+		return e
 	}
 
-	b := i.Bounds()
-	m := image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
-	draw.Draw(m, m.Bounds(), i, b.Min, draw.Src)
-	return m, nil
+	if !started {
+		started = true
+		go func() {
+			_, filename, _, _ := runtime.Caller(0)
+			cmd := exec.Command(path.Join(path.Dir(filename), "show.py"), "current.svg")
+			e := cmd.Run()
+			if e != nil {
+				fmt.Println(e)
+			}
+		}()
+	}
+
+	return nil
 }

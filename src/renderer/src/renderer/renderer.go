@@ -63,6 +63,8 @@ func qprocess(edge *graphviz.Edge) {
 
 var e2d map[*graphviz.Edge]string
 var qs map[*graphviz.Edge]*list.List
+var display *os.Process = nil
+var exit = -1
 
 func handle(cmd string, args []string, network *graphviz.Graph) (HandleR, string) {
 	switch cmd {
@@ -232,12 +234,18 @@ func main() {
 
 		if err != nil {
 			if err == io.EOF {
-				os.Exit(0)
+				exit = 0
+			} else {
+				panic(err)
 			}
-			panic(err)
+		} else {
+			iterate(network, strings.TrimSpace(cmd))
 		}
 
-		iterate(network, strings.TrimSpace(cmd))
+		if exit >= 0 {
+			display.Kill()
+			os.Exit(exit)
+		}
 	}
 }
 
@@ -258,7 +266,7 @@ func iterate(g *graphviz.Graph, command string) {
 	fmt.Println(out)
 
 	if ok == QUIT {
-		os.Exit(0)
+		exit = 0
 		return
 	}
 
@@ -269,7 +277,7 @@ func iterate(g *graphviz.Graph, command string) {
 	err := plot(g)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Plotting exited with status code %s\n", err)
-		os.Exit(1)
+		exit = 1
 		return
 	}
 
@@ -304,14 +312,13 @@ func plot(g *graphviz.Graph) error {
 
 	if !started {
 		started = true
-		go func() {
-			_, filename, _, _ := runtime.Caller(0)
-			cmd := exec.Command(path.Join(path.Dir(filename), "show.py"), "current.svg")
-			e := cmd.Run()
-			if e != nil {
-				fmt.Println(e)
-			}
-		}()
+		_, filename, _, _ := runtime.Caller(0)
+		cmd := exec.Command(path.Join(path.Dir(filename), "show.py"), "current.svg")
+		e := cmd.Start()
+		if e != nil {
+			fmt.Println(e)
+		}
+		display = cmd.Process
 	}
 
 	return nil

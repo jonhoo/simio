@@ -43,8 +43,8 @@ Transition-Name:
 Transition-Precondition:
 	return to not in self.enlisted
 Transition-Output:
-	m = self.ballot
 	self.enlisted.push(to)
+	return self.ballot
 
 # Leader asks node to accept value
 Transition-Name:
@@ -52,8 +52,8 @@ Transition-Name:
 Transition-Precondition:
 	return self.votes > N/2 and to not in self.won
 Transition-Output:
-	m = (self.ballot, self.value)
 	self.won.push(to)
+	return (self.ballot, self.value)
 
 # Node sends ack to leader
 Transition-Name:
@@ -61,7 +61,7 @@ Transition-Name:
 Transition-Precondition:
 	return len(self.sendq[to]) > 0
 Transition-Output:
-	m = self.sendq[to][0]
+	return self.sendq[to][0]
 Transition-Effect:
 	self.sendq[to].popleft()
 
@@ -69,7 +69,7 @@ Transition-Effect:
 Transition-Name:
 	recv_ack(m)
 Transition-Effect:
-	self.votes++
+	self.votes = self.votes + 1
 	if m[1] is not None:
 		self.accepted[1] = m[1]
 
@@ -79,10 +79,10 @@ Transition-Name:
 Transition-Effect:
 	if m > self.accepted[0]:
 		self.accepted[0] = m
-		sendq[from].push(m, self.accepted[1], self.accepted[0])
+		sendq[fr].push(m, self.accepted[1], self.accepted[0])
 
 # Node receives decision from leader
-Transition-Name
+Transition-Name:
 	decide(m)
 Transition-Effect:
 	if m[0] > self.accepted[0]:

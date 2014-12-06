@@ -4,6 +4,7 @@ import getopt
 import gv
 import random
 import sys
+import time
 
 # use the parser to generate wtf
 import wtf
@@ -211,7 +212,7 @@ class Net:
 	srcname = self.node(sn.tranid('in')).name
 	# don't print send/recv twice
 	if dn.ischannel():
-		torender('send %s %s %s' % (srcname, dstname, ea.aname))
+		torender('send %s %s "%s"' % (srcname, dstname, "%s(%s)" % (ea.aname, output)))
 		torender('recv %s %s' % (dstname, srcname))
 
     def simstarting(self, m):

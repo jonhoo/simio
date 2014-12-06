@@ -27,8 +27,8 @@ State:
 	self.accepted = (0, None)
 
 	# For leaders in phase 1
-	self.ballot = random.random()
-	self.value = random.random()
+	self.ballot = random.randint(1,100)
+	self.value = random.randint(1,100)
 	self.enlisted = []
 
 	# For leaders in phase 2
@@ -43,7 +43,7 @@ Transition-Name:
 Transition-Precondition:
 	return to not in self.enlisted
 Transition-Output:
-	self.enlisted.push(to)
+	self.enlisted.append(to)
 	return self.ballot
 
 # Leader asks node to accept value
@@ -52,7 +52,7 @@ Transition-Name:
 Transition-Precondition:
 	return self.votes > N/2 and to not in self.won
 Transition-Output:
-	self.won.push(to)
+	self.won.append(to)
 	return (self.ballot, self.value)
 
 # Node sends ack to leader
@@ -63,7 +63,7 @@ Transition-Precondition:
 Transition-Output:
 	return self.sendq[to][0]
 Transition-Effect:
-	self.sendq[to].popleft()
+	self.sendq[to].pop(0)
 
 # Leader receives ack from node
 Transition-Name:
@@ -78,8 +78,8 @@ Transition-Name:
 	proposal(m)
 Transition-Effect:
 	if m > self.accepted[0]:
-		self.accepted[0] = m
-		sendq[fr].push(m, self.accepted[1], self.accepted[0])
+		self.accepted = (m, self.accepted[1])
+		self.sendq[fr].append((m, self.accepted[1], self.accepted[0]))
 
 # Node receives decision from leader
 Transition-Name:

@@ -36,9 +36,9 @@ Transition-Name:
 	receive(m)
 Transition-Effect:
 	if self.active:
-		self.received.push(m)
+		self.received.append(m)
 	else:
-		self.sendq.push(m)
+		self.sendq.append(m)
 
 # Process a buffered message
 Transition-Name:
@@ -65,7 +65,7 @@ Transition-Effect:
 
 	# Pass along one-step probe
 	if m[2] == 2:
-		self.sendq.push((m[0], m[1], m[2]-1))
+		self.sendq.append((m[0], m[1], m[2]-1))
 
 	# Record first probe; wait for second
 	if self.probe1 is None:
@@ -84,8 +84,8 @@ Transition-Effect:
 	# We saw a winning token, adopt it and start a new phase
 	elif self.probe1 > self.cid and self.probe1 > self.probe2:
 		self.cid = self.probe2
-		self.phase++
-		self.sendq.push(self.phase, self.cid, 2)]
+		self.phase = self.phase + 1
+		self.sendq.append((self.phase, self.cid, 2))
 		self.waitfor = self.phase
 	# We didn't win; give up... Someone else will get our id
 	else:

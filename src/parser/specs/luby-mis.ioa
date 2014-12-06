@@ -1,0 +1,78 @@
+#
+# Luby's Maximal Independent Set algorithm for asynchronous nodes
+# http://books.google.com/books?id=G7SZ32dPuLgC&lpg=PA170&ots=fL4yuWJB5j&dq=luby%20maximal%20independent%20set%20asynchronous&pg=PA170#v=onepage&q&f=false
+#
+
+Name:
+	LubyMIS
+
+Signature-Input:
+	rrandom(m)
+	rselected(m)
+	reliminated(m)
+
+Signature-Output:
+	random(m) connect rrandom
+	selected(m) connect rselected
+	eliminated(m) connect reliminiated
+
+State:
+	import random
+	self.neighbourset = self.nbrs
+	self.rand = random.random()
+	self.selected = False
+	self.eliminated = False
+	self.sendq = [('random', self.rand) for n in self.nbrs]
+	self.rrand = []
+
+# Senders
+Transition-Name:
+	random(m)
+Transition-Precondition:
+	return len([f for f in self.sendq if f[0] is 'random' and f[1] is to]) > 0
+Transition-Output:
+	m = [f for f in self.sendq if f[0] is 'random' and f[1] is to][0]
+Transition-Effect:
+	rm = None
+	for f in self.sendq:
+		if f[0] is 'random' and f[1] is to:
+			rm = f
+	self.sendq.remove(rm)
+
+Transition-Name:
+	selected(m)
+Transition-Precondition:
+	return len([f for f in self.sendq if f[0] is 'selected' and f[1] is to]) > 0
+Transition-Output:
+	m = [f for f in self.sendq if f[0] is 'selected' and f[1] is to][0]
+Transition-Effect:
+	rm = None
+	for f in self.sendq:
+		if f[0] is 'selected' and f[1] is to:
+			rm = f
+	self.sendq.remove(rm)
+
+Transition-Name:
+	eliminated(m)
+Transition-Precondition:
+	return len([f for f in self.sendq if f[0] is 'selected' and f[1] is to]) > 0
+Transition-Output:
+	m = [f for f in self.sendq if f[0] is 'selected' and f[1] is to][0]
+Transition-Effect:
+	rm = None
+	for f in self.sendq:
+		if f[0] is 'selected' and f[1] is to:
+			rm = f
+	self.sendq.remove(rm)
+
+Transition-Name:
+	rrandom(m)
+Transition-Effect:
+	self.rrand.push(m[1])
+	if len(self.rrand) == len(self.neighbourset):
+		lt = True
+		for r in self.rrand:
+			lt = lt and self.rand < r
+		if lt:
+			for j in self.neighbourset:
+			self.sendq.push(('selected', True)

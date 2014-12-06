@@ -14,7 +14,7 @@ Signature-Input:
 Signature-Output:
 	random(m) connect rrandom
 	selected(m) connect rselected
-	eliminated(m) connect reliminiated
+	eliminated(m) connect reliminated
 
 State:
 	import random
@@ -22,8 +22,11 @@ State:
 	self.rand = random.random()
 	self.selected = False
 	self.eliminated = False
-	self.sendq = [('random', self.rand) for n in self.nbrs]
+	self.sendq = [('random', n, self.rand) for n in self.nbrs]
+
 	self.rrand = []
+	self.rsel = []
+	self.relim = []
 
 # Senders
 Transition-Name:
@@ -31,7 +34,7 @@ Transition-Name:
 Transition-Precondition:
 	return len([f for f in self.sendq if f[0] is 'random' and f[1] is to]) > 0
 Transition-Output:
-	m = [f for f in self.sendq if f[0] is 'random' and f[1] is to][0]
+	return [f[2] for f in self.sendq if f[0] is 'random' and f[1] is to][0]
 Transition-Effect:
 	rm = None
 	for f in self.sendq:
@@ -44,7 +47,7 @@ Transition-Name:
 Transition-Precondition:
 	return len([f for f in self.sendq if f[0] is 'selected' and f[1] is to]) > 0
 Transition-Output:
-	m = [f for f in self.sendq if f[0] is 'selected' and f[1] is to][0]
+	return [f[2] for f in self.sendq if f[0] is 'selected' and f[1] is to][0]
 Transition-Effect:
 	rm = None
 	for f in self.sendq:
@@ -55,24 +58,59 @@ Transition-Effect:
 Transition-Name:
 	eliminated(m)
 Transition-Precondition:
-	return len([f for f in self.sendq if f[0] is 'selected' and f[1] is to]) > 0
+	return len([f for f in self.sendq if f[0] is 'eliminated' and f[1] is to]) > 0
 Transition-Output:
-	m = [f for f in self.sendq if f[0] is 'selected' and f[1] is to][0]
+	return [f[2] for f in self.sendq if f[0] is 'eliminated' and f[1] is to][0]
 Transition-Effect:
 	rm = None
 	for f in self.sendq:
-		if f[0] is 'selected' and f[1] is to:
+		if f[0] is 'eliminated' and f[1] is to:
 			rm = f
 	self.sendq.remove(rm)
 
 Transition-Name:
 	rrandom(m)
 Transition-Effect:
-	self.rrand.push(m[1])
+	self.rrand.append(m)
 	if len(self.rrand) == len(self.neighbourset):
 		lt = True
 		for r in self.rrand:
 			lt = lt and self.rand < r
+		self.rrand = []
 		if lt:
 			for j in self.neighbourset:
-			self.sendq.push(('selected', True)
+				self.sendq.append(('selected', j, True))
+			self.selected = True
+		else:
+			self.rsel = []
+			for j in self.neighbourset:
+				self.sendq.append(('selected', j, False))
+
+Transition-Name:
+	rselected(m)
+Transition-Effect:
+	self.rsel.append((fr, m))
+	if len(self.rselected) == len(self.neighbourset):
+		t = [m for m in self.rselected if m[1]]
+		f = [m for m in self.rselected if not m[1]]
+		if len(t) > 0:
+			for j in f:
+				self.sendq.append(('eliminated', j, True))
+			self.eliminated = True
+		else:
+			self.relim = []
+			for j in f:
+				self.sendq.append(('eliminated', j, False))
+
+Transition-Name:
+	reliminated(m)
+Transition-Effect:
+	self.relim.append((fr, m))
+	if len(self.relim) == len(self.neighbourset):
+		for j in self.neighbourset:
+			if (j, True) in relim:
+				self.neighbourset.remove(j)
+		if len(self.neighbourset) == 0:
+			self.selected = True
+		else:
+			self.sendq.extend([('random', j, self.rand) for j in self.neighbourset])

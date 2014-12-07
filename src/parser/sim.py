@@ -339,7 +339,7 @@ def ioinit():
     # so prints go to stderr
     sys.stdout = sys.stderr
 
-def btest(graphfile, lim=1000):
+def btest(graphfile, lim, st):
 
     ioinit()
 
@@ -355,6 +355,8 @@ def btest(graphfile, lim=1000):
         i += 1
 	if i >= lim:
 		break
+        if st:
+            time.sleep(st)
 
     log('done')
 
@@ -395,17 +397,20 @@ if __name__ == '__main__':
 
     graphfile = 'graph.gv'
     lim=1000
+    st = 0.0
 
     args = sys.argv[1:]
     if args:
-        os, args = getopt.getopt(args, 'g:l:')
+        os, args = getopt.getopt(args, 'g:l:s:')
         for o, a in os:
             if o == '-g':
                 graphfile = a
             if o == '-l':
                 lim = a
+            if o == '-s':
+                st = float(a)
         if len(args) > 0:
             print "Unknown trailing arguments: %s" % args
 
-    btest(graphfile, lim)
+    btest(graphfile, lim, st)
     #maintest()

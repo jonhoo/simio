@@ -11,5 +11,3 @@ digraph {
   a3 -> a4;
   a4 -> a1;
 }
-
-start a1

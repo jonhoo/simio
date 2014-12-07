@@ -22,5 +22,3 @@ digraph {
   a4 -> a2;
   a4 -> a3;
 }
-
-start a1

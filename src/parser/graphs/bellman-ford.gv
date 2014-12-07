@@ -18,5 +18,3 @@ digraph {
   a1 -> a4 [weight = 1]
   a4 -> a1 [weight = 1]
 }
-
-start a1

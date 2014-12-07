@@ -371,15 +371,26 @@ class Nbuilder:
         ret.chanid = (fid, tid)
         return ret
 
-def ioinit():
+def ioinit(graphfile):
+    import os
+    import subprocess
+    # start renderer
+    renderer = subprocess.Popen([os.path.join(
+        os.path.dirname(sys.argv[1]),
+        '..',
+        'renderer',
+        'bin',
+        'renderer'
+        ), graphfile],
+        stdin=subprocess.PIPE)
+    glob.render = renderer.stdin
     glob.console = sys.stderr
-    glob.render = sys.stdout
-    # so prints go to stderr
+    # so automata prints go to stderr
     sys.stdout = sys.stderr
 
 def btest(graphfile, lim, st):
 
-    ioinit()
+    ioinit(graphfile)
 
     fn = graphfile
     log('reading %s...' % (fn))

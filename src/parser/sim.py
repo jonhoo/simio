@@ -355,6 +355,7 @@ def btest(graphfile, lim, st):
         i += 1
 	if i >= lim:
 		break
+        glob.render.flush()
         if st:
             time.sleep(st)
 

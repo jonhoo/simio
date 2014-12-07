@@ -13,15 +13,19 @@ Signature-Output:
 
 State:
 	self.parent = None
-	self.dist = 0 if self.i == 0 else None
+	self.updated = []
+	self.dist = None
+	if self.i == 0:
+		self.dist = 0
 
 Transition-Name:
 	send(m)
 Transition-Precondition:
-	return self.dist is not None
+	return self.dist is not None and to not in self.updated
 Transition-Output:
-	print self.i, self.dist
 	return (self.i, self.dist)
+Transition-Effect:
+	self.updated.append(to)
 
 Transition-Name:
 	receive(m)
@@ -30,6 +34,8 @@ Transition-Effect:
 	if self.dist is None or act < self.dist:
 		self.dist = act
 		self.parent = m[0]
+		self.updated = []
+		print self.i, self.dist
 
 Tasks:
 	send(m)

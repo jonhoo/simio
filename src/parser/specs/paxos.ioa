@@ -8,22 +8,27 @@ Name:
 Signature-Input:
 	# Leader
 	recv_ack(m)
+	collect(m)
 	# Other
 	proposal(m)
-	decide(m)
+	raccept(m)
+	rdecided(m)
 
 Signature-Output:
 	# Leader
 	prepare(m) connect proposal
-	accept(m) connect decide
+	accept(m) connect raccept
+	decided(m) connect rdecided
 	# Other
 	ack(m) connect recv_ack
+	accepted(m) connect collect
 
 State:
 	import random
 
 	# For all nodes
-	self.sendq = {n: [] for n in self.nbrs}
+	self.sendq_ack = {n: [] for n in self.nbrs}
+	self.sendq_acc = {n: [] for n in self.nbrs}
 	self.accepted = (0, None)
 
 	# For leaders in phase 1
@@ -32,10 +37,12 @@ State:
 	self.enlisted = []
 
 	# For leaders in phase 2
-	self.votes = 0
+	self.votes = 1 # it votes for itself
 
 	# For leaders in phase 3
 	self.won = []
+	self.naccepted = 0
+	self.notify = []
 
 # Leader asks node to vote for proposed value
 Transition-Name:
@@ -50,8 +57,18 @@ Transition-Output:
 Transition-Name:
 	accept(m)
 Transition-Precondition:
-	return self.votes > N/2 and to not in self.won
+	return self.votes > N/2. and to not in self.won
 Transition-Output:
+	print "%d has enough votes; asking %d to accept %d" % (self.i, to, self.value)
+	if self.i not in self.won:
+		if self.ballot >= self.accepted[0]:
+			if self.accepted[1] is None:
+				self.accepted = (self.accepted[0], self.value)
+
+			# We vote for ourselves
+			self.naccepted = self.naccepted + 1
+			self.won.append(self.i)
+
 	self.won.append(to)
 	return (self.ballot, self.value)
 
@@ -59,17 +76,46 @@ Transition-Output:
 Transition-Name:
 	ack(m)
 Transition-Precondition:
-	return len(self.sendq[to]) > 0
+	return len(self.sendq_ack[to]) > 0
 Transition-Output:
-	return self.sendq[to][0]
+	return self.sendq_ack[to][0]
 Transition-Effect:
-	self.sendq[to].pop(0)
+	print "%d votes for %d's ballot %s" % (self.i, to, self.sendq_ack[to][0])
+	self.sendq_ack[to].pop(0)
+
+# Node sends accepted to leader
+Transition-Name:
+	accepted(m)
+Transition-Precondition:
+	return len(self.sendq_acc[to]) > 0
+Transition-Output:
+	return self.sendq_acc[to][0]
+Transition-Effect:
+	print "%d accepts %d's ballot" % (self.i, to)
+	self.sendq_acc[to].pop(0)
+
+# Leader notifies node that decision has been made
+Transition-Name:
+	decided(m)
+Transition-Precondition:
+	return self.naccepted > N/2. and to not in self.notify
+Transition-Output:
+	if self.i not in self.notify:
+		print "%d accepted own value %d" % (self.i, self.accepted[1])
+		# Indicate that we're done
+		self.notify.append(self.i)
+		mark("green")
+
+	self.notify.append(to)
+	return self.value
 
 # Leader receives ack from node
 Transition-Name:
 	recv_ack(m)
 Transition-Effect:
+	print "node %d voted for %d's ballot with %s" % (fr, self.i, m)
 	self.votes = self.votes + 1
+	print "node %d now has %d/%d votes" % (self.i, self.votes, N)
 	if m[1] is not None:
 		self.accepted[1] = m[1]
 
@@ -77,20 +123,38 @@ Transition-Effect:
 Transition-Name:
 	proposal(m)
 Transition-Effect:
-	if m > self.accepted[0]:
+	if m >= self.accepted[0]:
+		print "node %d voting for %d's ballot %s" % (self.i, fr, m)
 		self.accepted = (m, self.accepted[1])
-		self.sendq[fr].append((m, self.accepted[1], self.accepted[0]))
+		self.sendq_ack[fr].append((m, self.accepted[1], self.accepted[0]))
 
-# Node receives decision from leader
+# Node receives accept request from leader
 Transition-Name:
-	decide(m)
+	raccept(m)
 Transition-Effect:
-	if m[0] > self.accepted[0]:
-		print "%d accepted value %d" % (self.i, self.accepted[1])
-		# Indicate that we're done
-		self.markcb("green")
+	print "%d asked to accept value %d in ballot %d (> %d?)" % (self.i, m[1], m[0], self.accepted[0])
+	if m[0] >= self.accepted[0]:
+		self.sendq_acc[fr].append(True)
 
+# Leader learns about accepted value
+Transition-Name:
+	collect(m)
+Transition-Effect:
+	print "node %d accepted %d's ballot" % (fr, self.i)
+	self.naccepted = self.naccepted + 1
+	print "node %d now has %d/%d accepts" % (self.i, self.naccepted, N)
+
+# Node learns about decision
+Transition-Name:
+	rdecided(m)
+Transition-Effect:
+	print "%d accepted value %d" % (self.i, m)
+	# Indicate that we're done
+	mark("green")
+	
 Tasks:
 	prepare(m)
 	accept(m)
 	ack(m)
+	accepted(m)
+	decided(m)

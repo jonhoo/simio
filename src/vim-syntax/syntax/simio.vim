@@ -14,9 +14,9 @@ syn match Comment /^\s*#.*$/
 syn match sectionKeywords /^\(Name\|Signature-\(Input\|Output\)\|Tasks\)/
 syn match sectionKeywords /^Transition-Name/
 syn match executableKeywords /^\(State\|\(Transition-\(Precondition\|Output\|Effect\)\)\)/ contained
-syn match specialVariables /\<self\.\(i\|weights\|nbrs\|markcb\)\>/ contained
+syn match specialVariables /\<self\.\(i\|weights\|nbrs\)\>/ contained
 syn match specialVariables /\<\(to\|fr\)\>/ contained
-syn match globalVariables /\<N\>/ contained
+syn match globalVariables /\<\(N\|mark\)\>/ contained
 hi def link executableKeywords Identifier
 hi def link sectionKeywords Identifier
 hi def link specialVariables Special

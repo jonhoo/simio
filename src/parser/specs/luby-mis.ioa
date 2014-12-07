@@ -88,12 +88,12 @@ Transition-Effect:
 		self.rsel = []
 		if len(t) > 0:
 			for j in f:
-				self.sendq.append(('eliminated', j, True))
+				self.sendq.append(('eliminated', j[0], True))
 			self.eliminated = True
 			mark("red")
 		else:
 			for j in f:
-				self.sendq.append(('eliminated', j, False))
+				self.sendq.append(('eliminated', j[0], False))
 	else:
 		print "%d has %d/%d selected" % (self.i, len(self.rsel), len(self.neighbourset))
 
@@ -104,13 +104,14 @@ Transition-Effect:
 	if len(self.relim) == len(self.neighbourset):
 		print "%d has all %d eliminated" % (self.i, len(self.neighbourset))
 		for j in self.neighbourset:
-			if (j, True) in relim:
+			if (j, True) in self.relim:
 				self.neighbourset.remove(j)
 		self.relim = []
 		if len(self.neighbourset) == 0:
 			self.selected = True
 			mark("green")
 		else:
+			import random
 			print "%d is restarting" % (self.i)
 			self.rand = random.random()
 			self.sendq.extend([('random', j, self.rand) for j in self.neighbourset])

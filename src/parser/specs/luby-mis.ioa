@@ -61,6 +61,7 @@ Transition-Name:
 Transition-Effect:
 	self.rrand.append(m)
 	if len(self.rrand) == len(self.neighbourset):
+		print "%d has all %d randoms" % (self.i, len(self.neighbourset))
 		lt = True
 		for r in self.rrand:
 			lt = lt and self.rand < r
@@ -74,14 +75,18 @@ Transition-Effect:
 			self.rsel = []
 			for j in self.neighbourset:
 				self.sendq.append(('selected', j, False))
+	else:
+		print "%d has %d/%d randoms" % (self.i, len(self.rrand), len(self.neighbourset))
 
 Transition-Name:
 	rselected(m)
 Transition-Effect:
 	self.rsel.append((fr, m))
 	if len(self.rsel) == len(self.neighbourset):
+		print "%d has all %d selected" % (self.i, len(self.neighbourset))
 		t = [m for m in self.rsel if m[1]]
 		f = [m for m in self.rsel if not m[1]]
+		self.rsel = []
 		if len(t) > 0:
 			for j in f:
 				self.sendq.append(('eliminated', j, True))
@@ -91,20 +96,27 @@ Transition-Effect:
 			self.relim = []
 			for j in f:
 				self.sendq.append(('eliminated', j, False))
+	else:
+		print "%d has %d/%d selected" % (self.i, len(self.rsel), len(self.neighbourset))
 
 Transition-Name:
 	reliminated(m)
 Transition-Effect:
 	self.relim.append((fr, m))
 	if len(self.relim) == len(self.neighbourset):
+		print "%d has all %d eliminated" % (self.i, len(self.neighbourset))
 		for j in self.neighbourset:
 			if (j, True) in relim:
 				self.neighbourset.remove(j)
+		self.relim = []
 		if len(self.neighbourset) == 0:
 			self.selected = True
 			mark("green")
 		else:
+			self.rand = random.random()
 			self.sendq.extend([('random', j, self.rand) for j in self.neighbourset])
+	else:
+		print "%d has %d/%d eliminated" % (self.i, len(self.relim), len(self.neighbourset))
 
 Tasks:
 	random(m)

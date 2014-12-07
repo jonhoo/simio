@@ -96,7 +96,7 @@ class SNode:
                 assert arity == 0
                 if action['prec']():
                     ret.append(EnAction(self.myid, ct, atype, 0))
-                    continue
+                continue
 
             # must be an output action
             if ct not in self.omap:

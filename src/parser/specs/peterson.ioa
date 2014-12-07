@@ -66,16 +66,20 @@ Transition-Effect:
 
 	# Pass along one-step probe
 	if m[2] == 2:
+		print "%d forwards %s" % (self.i, m)
 		self.sendq.append((m[0], m[1], m[2]-1))
 
 	# Record first probe; wait for second
 	if self.probe1 is None:
+		print "%d (now %d) gets first probe %s" % (self.i, self.cid, m)
 		self.probe1 = m[1]
 		return
 
 	# Record second probe
 	if self.probe2 is None:
+		print "%d (now %d) gets second probe %s" % (self.i, self.cid, m)
 		self.probe2 = m[1]
+
 
 	# Our token passed around, we win!
 	if self.probe1 == self.cid:
@@ -83,13 +87,17 @@ Transition-Effect:
 		# Show that we're the leader
 		self.markcb("green")
 	# We saw a winning token, adopt it and start a new phase
-	elif self.probe1 > self.cid and self.probe1 > self.probe2:
+	if self.probe1 > self.cid and self.probe1 > self.probe2:
+		print "%d adopts cid %d (formerly %d)" % (self.i, self.probe2, self.cid)
 		self.cid = self.probe2
 		self.phase = self.phase + 1
+		self.probe1 = None
+		self.probe2 = None
 		self.sendq.append((self.phase, self.cid, 2))
 		self.waitfor = self.phase
 	# We didn't win; give up... Someone else will get our id
 	else:
+		print "%d was eliminated" % (self.i)
 		self.active = False
 		self.sendq.extend(self.received)
 		self.received = []

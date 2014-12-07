@@ -72,7 +72,6 @@ Transition-Effect:
 			self.selected = True
 			mark("green")
 		else:
-			self.rsel = []
 			for j in self.neighbourset:
 				self.sendq.append(('selected', j, False))
 	else:
@@ -93,7 +92,6 @@ Transition-Effect:
 			self.eliminated = True
 			mark("red")
 		else:
-			self.relim = []
 			for j in f:
 				self.sendq.append(('eliminated', j, False))
 	else:
@@ -113,6 +111,7 @@ Transition-Effect:
 			self.selected = True
 			mark("green")
 		else:
+			print "%d is restarting" % (self.i)
 			self.rand = random.random()
 			self.sendq.extend([('random', j, self.rand) for j in self.neighbourset])
 	else:

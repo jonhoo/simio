@@ -81,7 +81,7 @@ class Tran:
             print '\t'*idts + i
 
     def prprologue(self, idts):
-        print '\t'*idts + 'i, N = self.i, self.N'
+        print '\t'*idts + 'N = self.N'
         print '\t'*idts + 'mark = self.mark'
 
     def setname(self, l):

@@ -139,7 +139,7 @@ class Parser:
         print ''.join(['\t\t' + i + '\n' for i in get('state')])
 
         print '\tdef mark(self, m):'
-        print '\t\tself.markcb("mark %d %s" % (self.i, m))'
+        print '\t\tself.markcb(m)'
 
         print '\tdef actions(self):'
         print '\t\tret = {}'

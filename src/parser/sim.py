@@ -19,6 +19,7 @@ def log(s):
 
 def torender(s):
     print >> glob.render, '%s' % (s)
+    glob.render.flush()
 
 # Special IDs used to catch unconnected output actions
 class StaticID:
@@ -181,7 +182,7 @@ class Net:
         sn = self.nodes[dsn.myid]
         assert sn.actions[dstaction]['atype'] == 'input'
 
-    def doenaction(self, ea):
+    def doenaction(self, ea, st = 0):
 
         sn = self.nodes[ea.src]
         action = sn.actions[ea.aname]
@@ -239,10 +240,13 @@ class Net:
     def simstarting(self, m):
         n = self.N()
         for i in self.nodes.values():
+            def mark(msg, node=i):
+                m('mark %s "%s"' % (node.name, msg))
+
             i.obj.N = n
             i.obj.weights = i.weights
             i.obj.nbrs = i.Nbrs()
-            i.obj.markcb = m
+            i.obj.markcb = mark
             i.obj.init()
 
         # connect outputless actions to environment

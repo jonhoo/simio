@@ -32,41 +32,29 @@ State:
 Transition-Name:
 	random(m)
 Transition-Precondition:
-	return len([f for f in self.sendq if f[0] is 'random' and f[1] is to]) > 0
+	return len(self.sendq) > 0 and self.sendq[0][0] is 'random' and self.sendq[0][1] is to
 Transition-Output:
-	return [f[2] for f in self.sendq if f[0] is 'random' and f[1] is to][0]
+	return self.sendq[0][2]
 Transition-Effect:
-	rm = None
-	for f in self.sendq:
-		if f[0] is 'random' and f[1] is to:
-			rm = f
-	self.sendq.remove(rm)
+	self.sendq.pop(0)
 
 Transition-Name:
 	selected(m)
 Transition-Precondition:
-	return len([f for f in self.sendq if f[0] is 'selected' and f[1] is to]) > 0
+	return len(self.sendq) > 0 and self.sendq[0][0] is 'selected' and self.sendq[0][1] is to
 Transition-Output:
-	return [f[2] for f in self.sendq if f[0] is 'selected' and f[1] is to][0]
+	return self.sendq[0][2]
 Transition-Effect:
-	rm = None
-	for f in self.sendq:
-		if f[0] is 'selected' and f[1] is to:
-			rm = f
-	self.sendq.remove(rm)
+	self.sendq.pop(0)
 
 Transition-Name:
 	eliminated(m)
 Transition-Precondition:
-	return len([f for f in self.sendq if f[0] is 'eliminated' and f[1] is to]) > 0
+	return len(self.sendq) > 0 and self.sendq[0][0] is 'eliminated' and self.sendq[0][1] is to
 Transition-Output:
-	return [f[2] for f in self.sendq if f[0] is 'eliminated' and f[1] is to][0]
+	return self.sendq[0][2]
 Transition-Effect:
-	rm = None
-	for f in self.sendq:
-		if f[0] is 'eliminated' and f[1] is to:
-			rm = f
-	self.sendq.remove(rm)
+	self.sendq.pop(0)
 
 Transition-Name:
 	rrandom(m)
@@ -81,6 +69,7 @@ Transition-Effect:
 			for j in self.neighbourset:
 				self.sendq.append(('selected', j, True))
 			self.selected = True
+			mark("green")
 		else:
 			self.rsel = []
 			for j in self.neighbourset:
@@ -97,6 +86,7 @@ Transition-Effect:
 			for j in f:
 				self.sendq.append(('eliminated', j, True))
 			self.eliminated = True
+			mark("red")
 		else:
 			self.relim = []
 			for j in f:
@@ -112,6 +102,7 @@ Transition-Effect:
 				self.neighbourset.remove(j)
 		if len(self.neighbourset) == 0:
 			self.selected = True
+			mark("green")
 		else:
 			self.sendq.extend([('random', j, self.rand) for j in self.neighbourset])
 

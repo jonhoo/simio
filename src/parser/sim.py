@@ -256,10 +256,10 @@ class Net:
         ac['eff'](fr, msg)
 
     def N(self):
-        n = len(self.nodes)
+        n = len([n for n in self.nodes if not self.nodes[n].ischannel()])
         # print warning if fishy stuff
         eyes = [x.obj.i for x in self.nodes.values()]
-        ns = range(n+1)
+        ns = range(len(self.nodes)+1)
         for i in eyes:
             if i not in ns:
                 print '*Warning: missing an ID'

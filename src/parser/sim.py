@@ -31,10 +31,16 @@ class EnAction:
         self.src = src
         self.dst = dest
 
+        # input actions only
+        self.data = None
+
     def __repr__(self):
         s = '<EnAction; name: %s, type: %s, src: %s, dst: %s >' \
             % (self.aname, self.atype, str(self.src), str(self.dst))
         return s
+
+    def isinput(self):
+        return self.data is not None
 
 class SNode:
     def __init__(self, gid, name, obj, ac, ta):
@@ -49,7 +55,7 @@ class SNode:
         self.chanid = None
 
         # a map of action names to pairs of (i, j) where i is the destination
-        # id and j is the action of the node corresponding to destination id
+        # SNode and j is the action of the node corresponding to dest SNode
         self.omap = {}
         self.nbrs = {}
 
@@ -71,7 +77,7 @@ class SNode:
         self.nbrs[destsn.tranid('out')] = True
 
     def ischannel(self):
-        return self.chanid
+        return self.chanid is not None
 
     def getenabled(self):
         '''
@@ -182,11 +188,14 @@ class Net:
         if ea.atype == 'internal':
             assert action['arityeff'] == 0
             action['eff']()
-
-            return
+            return None
 
         # must be output action
+        dn = self.nodes[ea.dst]
         arity = action['arityoutput']
+        inaction = dn.actions[sn.namefor(ea.aname, ea.dst)]
+        assert arity == inaction['arityeff']
+
         # arity-1 since we provide dest, the rest are dummy args (should not
         # generate them in the parser?)
         did = ea.dst
@@ -199,21 +208,33 @@ class Net:
         # provide the output as input to the appropriate automaton
         if ea.dst == StaticID.ENVIRONMENT:
             log('Output to env: %s' % (str(output)))
-            return
-
-        dn = self.nodes[ea.dst]
-        inactname = sn.namefor(ea.aname, ea.dst)
-        inaction = dn.actions[inactname]
-        assert arity == inaction['arityeff']
-        args = [self.node(ea.src).tranid('in')] + [output]
-        apply(inaction['eff'], args)
+            return None
 
 	dstname = self.node(dn.tranid('out')).name
 	srcname = self.node(sn.tranid('in')).name
 	# don't print send/recv twice
 	if dn.ischannel():
-		torender('send %s %s "%s"' % (srcname, dstname, "%s(%s)" % (ea.aname, output)))
-		torender('recv %s %s' % (dstname, srcname))
+            torender('send %s %s "%s"' % (srcname, dstname, "%s(%s)" % (ea.aname, output)))
+
+        # convert ea to an input action
+        ea.data = output
+        return ea
+
+    def doinput(self, inact):
+        sn = self.nodes[inact.src]
+        dn = self.nodes[inact.dst]
+        output = inact.data
+
+        inactname = sn.namefor(inact.aname, inact.dst)
+        inaction = dn.actions[inactname]
+        args = [self.node(inact.src).tranid('in')] + [output]
+        apply(inaction['eff'], args)
+
+        dstname = self.node(dn.tranid('out')).name
+        srcname = self.node(sn.tranid('in')).name
+        # don't print send/recv twice
+        if not dn.ischannel():
+            torender('recv %s %s' % (dstname, srcname))
 
     def simstarting(self, m):
         n = self.N()
@@ -240,12 +261,25 @@ class Net:
 
         nextaction = random.choice(acs)
 
-        # remove all enabled actions from the node that owns nextaction since
-        # execution of nextaction may disable the other enabled actions
-        acs = filter(lambda x: x.src != nextaction.src, acs)
+        # getting complicated...
+        if nextaction.isinput():
+            # filter enabled actions from the node about to receive input since
+            # it may disable currently enabled actions. don't remove other
+            # input actions from the node about to receive though
+            acs = filter(lambda x: not x is nextaction, acs)
+            acs = filter(lambda x: x.src != nextaction.dst or x.isinput(), acs)
+            self.doinput(nextaction)
+            inact = None
+        else:
+            # remove all enabled actions from the node that owns nextaction since
+            # execution of nextaction may disable the other enabled actions
+            acs = filter(lambda x: x.src != nextaction.src, acs)
+            inact = self.doenaction(nextaction)
 
         self.actionstash = acs
-        self.doenaction(nextaction)
+        # queue input action if any
+        if inact:
+            self.actionstash.append(inact)
 
         return True
 

@@ -32,7 +32,7 @@ Transition-Name:
 	read(m)
 Transition-Effect:
 	d = self.nbrs[0]
-	print 'im %d, sending to %d' % (i, self.nbrs[0])
+	print 'im %d, sending to %d' % (self.i, self.nbrs[0])
 	if self.msgs.has_key(d):
 		self.msgs[d].append(m)
 	else:

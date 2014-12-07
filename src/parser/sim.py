@@ -19,6 +19,7 @@ def log(s):
 
 def torender(s):
     print >> glob.render, '%s' % (s)
+    glob.render.flush()
 
 # Special IDs used to catch unconnected output actions
 class StaticID:

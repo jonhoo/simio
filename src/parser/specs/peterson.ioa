@@ -7,7 +7,8 @@ Name:
 
 Signature-Input:
 	receive(m)
-
+Signature-Internal:
+	process
 Signature-Output:
 	send(m) connect receive
 
@@ -27,9 +28,9 @@ Transition-Name:
 Transition-Precondition:
 	return len(self.sendq) > 0
 Transition-Output:
-	m = self.sendq[0]
+	return self.sendq[0]
 Transition-Effect:
-	self.sendq.shift()
+	self.sendq = self.sendq[1:]
 
 # Forward a message if we're not active, or buffer it otherwise
 Transition-Name:
@@ -57,7 +58,7 @@ Transition-Precondition:
 Transition-Effect:
 	# Extract the first message for this phase
 	rm = None
-	for i, m in self.received:
+	for m in self.received:
 		if m[0] == self.waitfor:
 			rm = m
 			break
@@ -78,7 +79,7 @@ Transition-Effect:
 
 	# Our token passed around, we win!
 	if self.probe1 == self.cid:
-		print(self.i, "is the leader")
+		print self.i, "is the leader"
 		# Show that we're the leader
 		self.markcb("green")
 	# We saw a winning token, adopt it and start a new phase

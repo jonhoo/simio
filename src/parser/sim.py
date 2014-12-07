@@ -176,7 +176,7 @@ class Net:
         sn = self.nodes[dsn.myid]
         assert sn.actions[dstaction]['atype'] == 'input'
 
-    def doenaction(self, ea):
+    def doenaction(self, ea, st = 0):
 
         sn = self.nodes[ea.src]
         action = sn.actions[ea.aname]
@@ -214,6 +214,8 @@ class Net:
 	# don't print send/recv twice
 	if dn.ischannel():
 		torender('send %s %s "%s"' % (srcname, dstname, "%s(%s)" % (ea.aname, output)))
+                if st:
+                    time.sleep(st)
 		torender('recv %s %s' % (dstname, srcname))
 
     def simstarting(self, m):
@@ -230,7 +232,7 @@ class Net:
     def getenabledall(self):
         return reduce(lambda x, y: x + y, [self.nodes[x].getenabled() for x in self.nodes])
 
-    def step(self):
+    def step(self, st = 0):
         if not self.actionstash:
             self.actionstash = self.getenabledall()
         acs = self.actionstash
@@ -246,7 +248,7 @@ class Net:
         acs = filter(lambda x: x.src != nextaction.src, acs)
 
         self.actionstash = acs
-        self.doenaction(nextaction)
+        self.doenaction(nextaction, st)
 
         return True
 
@@ -352,7 +354,7 @@ def btest(graphfile, lim, st):
     n.simstarting(lambda x: torender(x))
     #n.manualinput(0, 'read', 0, 'herro there!')
     i = 0
-    while n.step():
+    while n.step(st):
         i += 1
 	if i >= lim:
 		break

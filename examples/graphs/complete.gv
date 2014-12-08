@@ -1,12 +1,12 @@
 digraph {
   size="8,8!";
   ratio="fill";
-  node [shape=circle penwidth=2];
+  node [shape=Mrecord penwidth=2 fontname=monospace];
   edge [fontsize=12];
-  a1;
-  a2;
-  a3;
-  a4;
+  a1 [label = "a1 | --"];
+  a2 [label = "a2 | --"];
+  a3 [label = "a3 | --"];
+  a4 [label = "a4 | --"];
 
   a1 -> a2;
   a1 -> a3;

@@ -105,6 +105,7 @@ Transition-Output:
 		# Indicate that we're done
 		self.notify.append(self.i)
 		mark("green")
+		label("%02d" % self.accepted[1])
 
 	self.notify.append(to)
 	return self.value
@@ -151,6 +152,7 @@ Transition-Effect:
 	print "%d accepted value %d" % (self.i, m)
 	# Indicate that we're done
 	mark("green")
+	label("%02d" % m)
 	
 Tasks:
 	prepare(m)

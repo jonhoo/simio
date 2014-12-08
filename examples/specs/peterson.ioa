@@ -98,7 +98,7 @@ Transition-Effect:
 		self.active = False
 		self.sendq.extend(self.received)
 		self.received = []
-		self.markcb("gray")
+		self.markcb("white")
 
 Tasks:
 	send(m)

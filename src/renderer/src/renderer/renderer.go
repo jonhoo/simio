@@ -62,6 +62,7 @@ func qprocess(edge *graphviz.Edge) {
 }
 
 var e2d map[*graphviz.Edge]string
+var ls map[*graphviz.Node]string
 var qs map[*graphviz.Edge]*list.List
 var display *os.Process = nil
 var exit = -1
@@ -78,6 +79,35 @@ func handle(cmd string, args []string, network *graphviz.Graph) (HandleR, string
 				return FAILURE, fmt.Sprintf("[E] Unknown node: %s", args[0])
 			}
 			node.Attrs["color"] = q(args[1])
+		}
+	case "label":
+		{
+			if len(args) == 1 {
+				args = append(args, "")
+			}
+			if len(args) != 2 {
+				return FAILURE, fmt.Sprintf("Usage: label <node> <text>")
+			}
+			node := network.Nodes.Lookup[args[0]]
+			if node == nil {
+				return FAILURE, fmt.Sprintf("[E] Unknown node: %s", args[0])
+			}
+			if args[1] == "" {
+				delete(node.Attrs, "shape")
+				if ls[node] == "" {
+					fmt.Println("deleting node label")
+					delete(node.Attrs, "label")
+				} else {
+					fmt.Println("resetting node label to", ls[node])
+					node.Attrs["label"] = q(ls[node])
+				}
+				break
+			}
+
+			ls[node] = node.Attrs["label"]
+			node.Attrs["shape"] = "Mrecord"
+			fmt.Println("setting node label to be", q(node.Name+" | "+args[1]))
+			node.Attrs["label"] = q(node.Name + " | " + args[1])
 		}
 	case "unmark":
 		{
@@ -138,6 +168,7 @@ func handle(cmd string, args []string, network *graphviz.Graph) (HandleR, string
 		{
 			e2d = make(map[*graphviz.Edge]string)
 			qs = make(map[*graphviz.Edge]*list.List)
+			ls = make(map[*graphviz.Node]string)
 			for _, e := range network.Edges.Edges {
 				qs[e] = list.New()
 				qprocess(e)
@@ -174,6 +205,7 @@ func main() {
 
 	e2d = make(map[*graphviz.Edge]string)
 	qs = make(map[*graphviz.Edge]*list.List)
+	ls = make(map[*graphviz.Node]string)
 
 	var spec []string
 	var dot bytes.Buffer

@@ -83,6 +83,7 @@ class Tran:
     def prprologue(self, idts):
         print '\t'*idts + 'N = self.N'
         print '\t'*idts + 'mark = self.markcb'
+        print '\t'*idts + 'label = self.labelcb'
 
     def setname(self, l):
         self.name = l
@@ -138,6 +139,7 @@ class Parser:
         print '\tdef init(self):'
         print '\t\tN = self.N'
         print '\t\tmark = self.markcb'
+        print '\t\tlabel = self.labelcb'
         print ''.join(['\t\t' + i + '\n' for i in get('state')])
 
         print '\tdef actions(self):'

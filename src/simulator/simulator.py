@@ -152,9 +152,9 @@ class Net:
 
     def __init__(self):
         self.nodes = {}
-        self.actionstash = []
         self.name2id = {}
         self.envsn = SNode(StaticID.ENVIRONMENT, None, None, None, None)
+	self.inactions = []
 
     def __repr__(self):
         s = ''
@@ -259,12 +259,10 @@ class Net:
         # connect outputless actions to environment
 
     def getenabledall(self):
-        return reduce(lambda x, y: x + y, [self.nodes[x].getenabled() for x in self.nodes])
+        return reduce(lambda x, y: x + y, [self.nodes[x].getenabled() for x in self.nodes]) + self.inactions
 
     def step(self):
-        if not self.actionstash:
-            self.actionstash = self.getenabledall()
-        acs = self.actionstash
+        acs = self.getenabledall()
 
         if not acs:
             log('no enabled actions')
@@ -272,25 +270,16 @@ class Net:
 
         nextaction = random.choice(acs)
 
-        # getting complicated...
         if nextaction.isinput():
-            # filter enabled actions from the node about to receive input since
-            # it may disable currently enabled actions. don't remove other
-            # input actions from the node about to receive though
-            acs = filter(lambda x: not x is nextaction, acs)
-            acs = filter(lambda x: x.src != nextaction.dst or x.isinput(), acs)
+            self.inactions = filter(lambda x: not x is nextaction, self.inactions)
             self.doinput(nextaction)
             inact = None
         else:
-            # remove all enabled actions from the node that owns nextaction since
-            # execution of nextaction may disable the other enabled actions
-            acs = filter(lambda x: x.src != nextaction.src, acs)
             inact = self.doenaction(nextaction)
 
-        self.actionstash = acs
         # queue input action if any
         if inact:
-            self.actionstash.append(inact)
+            self.inactions.append(inact)
 
         return True
 

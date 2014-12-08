@@ -1,0 +1,41 @@
+\documentclass{scrartcl}
+\usepackage{hyperref}
+
+\title{6.852 Project Proposal}
+\subtitle{A Visual Simulator for I/O Automata}
+\author{Jon Gjengset \and Srivatsa S. Bhat \and Cody Cutler}
+
+\begin{document}
+\maketitle
+
+We propose to develop a tool to visualize the behavior of I/O Automata in
+Asynchronous Distributed Systems.
+
+The I/O Automata simulator will be able to accept specifications in the style
+of the pseudo-code in the book. The tool would also allow the user to connect
+the given automata in arbitrary network topologies, control its inputs, and
+vary other interesting properties like UID configuration or link delay.
+
+The simulations would be shown by visualizing the system topology and
+displaying the actions taken by each automaton as the components interact with
+each other at every step.
+
+In addition to this, the tool would also potentially be able to output the
+empirical (lower/upper) bounds on the time and communication complexity of the
+specified distributed algorithm, by actually evaluating them for the particular
+scenarios determined by the user-inputs.  This will help us observe the
+theoretical bounds in practice, by choosing our inputs carefully (such that
+they bring about the best/worst-case behavior of the algorithm). 
+
+We believe that such a tool would be helpful for students to grasp complex
+distributed algorithms easily, since it provides a platform to visualize the
+various scenarios and also control and observe the behavior of the I/O automata
+under varying circumstances.
+
+\vspace{2mm}
+\textbf{References:}
+
+1. Nancy Lynch, \textit{Distributed Algorithms.} Morgan Kaufmann Publishers, 1996.
+
+2. Hagit Attiya and Jennifer Welch, \textit{Distributed Computing: Fundamentals, Simulations, and Advanced Topics.} John Wiley and Sons, Inc., 2004. Second Edition
+\end{document}

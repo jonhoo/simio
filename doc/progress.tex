@@ -1,0 +1,95 @@
+\documentclass{scrartcl}
+\usepackage{hyperref}
+
+\title{6.852 Project Status Report}
+\subtitle{A Visual Simulator for I/O Automata}
+\author{Jon Gjengset \and Cody Cutler}
+
+\begin{document}
+\maketitle
+
+\section{Project description}
+
+We aim to build an simulator that can simulate the behaviour of an algorithm
+specified using I/O automata when run on an arbitrary network graph. In
+particular, we want the user of the system to be able to write a specification
+of the algorithm, as well as designate some particular network graph, and then
+be able to simulate and visualize the algorithm's behaviour when run on all the
+nodes in the network.
+
+\section{Related work}
+
+Of particular note in terms of related work are the
+\href{http://groups.csail.mit.edu/tds/ioa/}{IOA Language and Toolset}, which
+simulates the behaviour of a single I/O automata, and the
+\href{http://www.veromodo.com/}{Tempo Toolset}, which simulates a single
+*timed* I/O automata. These tools provide the user with a domain-specific
+language for describing automata, as well as tools for simulating the operation
+of a single automata, doing invariant checking, verifying liveness and safety
+properties, and generating code.
+
+While these both provide authors of automata with powerful tools for verifying
+the correctness of their algorithms, they are not particularly useful for
+users who want to study the behaviour of an automata so as to better understand
+the underlying algorithm. In particular, we envision that students who are
+being introduced to reasoning about distributed systems using I/O automata for
+the first time, or seasoned researchers toying with an idea for a new
+algorithm, would benefit greatly from being able to see how a network of nodes
+behaves when running a specific algorithm. Furthermore, we believe that, by
+allowing the user to specify the network graph they are interested in, they can
+quickly explore corner cases that they suspect might be difficult for the
+algorithm, or they can improve their understanding of the algorithm by
+observing its behaviour in very different network topologies.
+
+Another reason why we feel existing solutions are insufficient is that they
+require the user to learn a new programming language simply to be able to type
+up an algorithm. Instead, we propose to provide the user with the ability to
+define their automata using the high-level programming language Python, which
+many computer scientists are already familiar with. State variables will be
+represented as Python variables, giving the user access to the suite of
+primitive types and classes provided by Python and its many third-party
+modules, without having to implement all these types ourselves. In the same
+vein, transitions will be specified as pure Python functions whose arguments
+are the current state variables, as well as any transition inputs, and whose
+return value will be the new state of the object. Modeling transitions this way
+allows us to give the full power of the Python language to the user, without
+incurring additional implementation cost for us.
+
+\section{Challenges}
+
+The flexibility of expression in our system means that doing formal verification
+or analysis of the automata becomes difficult. We surmise that this is the
+reason why previous work generally chose to implement a language from scratch;
+it gives them the opportunity to limit the language to only provide features
+that can be reasoned about using current program analysis techniques. We
+therefore position our simulator as a complement to existing tools, rather than
+as a replacement for them. In particular, we anticipate that users will first
+prototype their automata in our simulator to examine their behaviour, and then,
+once the algorithm has been sufficiently well refined, write their final
+automata specification using a specialized language such as Tempo so that
+formal methods can be used to prove properties of the final algorithm.
+
+\section{Project status}
+
+At this stage in the project's development, we have built rudimentary support
+for specifying automata, as well as a visualizing front-end that can display
+nodes in a network, as well as show communication between nodes. While these
+will both likely need further refinement, they are at the stage where we can
+now focus on building a working automata simulator. This simulator would first
+invoke the parser to get an executable version of the automata, construct and
+initialize several copies of the automata to correspond to each of the nodes in
+the simulated network, and link each automata as dictated by the network graph
+specification. Once this setup has been performed, it would then start
+executing the automata concurrently, ensuring fairness to each automata's task.
+The information about messages being sent and nodes changing state would then
+be communicated to the rendered in real-time, so that the visualization of the
+running algorithm can be produced.
+
+We anticipate that the biggest hurdle to making the simulator will be finding a
+good way of handling non-determinism in the simulated automata while still
+providing fairness. The reason for this is that a user may wish to bias the
+non-determistic choices to force the algorithm to behave in a particular way.
+It is not obvious how this can be done in a way that is both easy for the user,
+and, at the same time, does not get in the way of the simulator ensuring that
+the overall execution remains fair.
+\end{document}

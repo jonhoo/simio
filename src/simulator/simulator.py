@@ -214,18 +214,15 @@ class Net:
 
 	dstname = self.node(dn.tranid('out')).name
 	srcname = self.node(sn.tranid('in')).name
-	# don't print send/recv twice
+
 	if dn.ischannel():
-            torender('send %s %s "%s"' % (srcname, dstname, "%s(%s)" % (ea.aname, output)))
+            torender('send %s %s "%s"' % (srcname, dstname,
+	      "%s(%s)" % (ea.aname, output)))
+        self.doinput(ea, output)
 
-        # convert ea to an input action
-        ea.data = output
-        return ea
-
-    def doinput(self, inact):
+    def doinput(self, inact, output):
         sn = self.nodes[inact.src]
         dn = self.nodes[inact.dst]
-        output = inact.data
 
         inactname = sn.namefor(inact.aname, inact.dst)
         inaction = dn.actions[inactname]
@@ -234,7 +231,7 @@ class Net:
 
         dstname = self.node(dn.tranid('out')).name
         srcname = self.node(sn.tranid('in')).name
-        # don't print send/recv twice
+
         if not dn.ischannel():
             torender('recv %s %s' % (dstname, srcname))
 
@@ -256,10 +253,8 @@ class Net:
             i.obj.emarkcb = emark
             i.obj.init()
 
-        # connect outputless actions to environment
-
     def getenabledall(self):
-        return reduce(lambda x, y: x + y, [self.nodes[x].getenabled() for x in self.nodes]) + self.inactions
+        return reduce(lambda x, y: x + y, [self.nodes[x].getenabled() for x in self.nodes])
 
     def step(self):
         acs = self.getenabledall()
@@ -269,17 +264,7 @@ class Net:
             return False
 
         nextaction = random.choice(acs)
-
-        if nextaction.isinput():
-            self.inactions = filter(lambda x: not x is nextaction, self.inactions)
-            self.doinput(nextaction)
-            inact = None
-        else:
-            inact = self.doenaction(nextaction)
-
-        # queue input action if any
-        if inact:
-            self.inactions.append(inact)
+        self.doenaction(nextaction)
 
         return True
 

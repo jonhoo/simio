@@ -18,7 +18,8 @@ State:
 	# map of message queues
 	self.msgs = {}
 	self.counter = 0
-	self.mcount = 0
+	self.rcheck = {i:0 for i in self.nbrs}
+	self.wcheck = {i:0 for i in self.nbrs}
 
 # dummy method
 Transition-Name:
@@ -31,26 +32,17 @@ Transition-Effect:
 Transition-Name:
 	read(m)
 Transition-Effect:
-	d = self.nbrs[0]
-	print 'im %d, sending to %d' % (self.i, self.nbrs[0])
-	if self.msgs.has_key(d):
-		self.msgs[d].append(m)
-	else:
-		self.msgs[d] = [m]
+	assert m == self.rcheck[fr]
+	self.rcheck[fr] += 1
 
 Transition-Name:
 	write(m)
 Transition-Precondition:
-	if self.mcount > 10:
-		return False
-	if self.msgs.has_key(to):
-		return len(self.msgs[to])
-	return False
+	return self.wcheck[to] < 10
 Transition-Output:
-	return self.msgs[to][0]
+	return self.wcheck[to]
 Transition-Effect:
-	self.msgs[to] = self.msgs[to][1:]
-	self.mcount += 1
+	self.wcheck[to] += 1
 
 Tasks:
 	write(m)

@@ -16,6 +16,7 @@ State:
 	self.updated = []
 	self.dist = None
 	if self.i == 0:
+		mark("red")
 		self.dist = 0
 	else:
 		label("xx")

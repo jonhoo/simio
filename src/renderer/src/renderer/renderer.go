@@ -43,14 +43,25 @@ func findEdge(network *graphviz.Graph, n1 string, n2 string) (uint, *graphviz.Ed
 
 func qprocess(edge *graphviz.Edge) {
 	if qs[edge].Len() == 0 {
-		delete(edge.Attrs, "label")
-		delete(edge.Attrs, "color")
+		c, ok := ebrands[edge]
+
 		delete(edge.Attrs, "arrowhead")
+
+		if !ok || c.msg == "" {
+			delete(edge.Attrs, "label")
+		} else {
+			edge.Attrs["label"] = c.msg
+		}
+
+		if !ok || c.color == "" {
+			delete(edge.Attrs, "color")
+		} else {
+			edge.Attrs["color"] = c.color
+		}
 		return
 	}
 
 	edge.Attrs["labelfloat"] = "true"
-
 	edge.Attrs["color"] = "blue"
 
 	if qs[edge].Len() == 1 {
@@ -61,14 +72,44 @@ func qprocess(edge *graphviz.Edge) {
 	edge.Attrs["label"] = q(fmt.Sprintf("%s (+%d)", qs[edge].Front().Value, qs[edge].Len()-1))
 }
 
+type ebrand struct {
+	color string
+	msg   string
+}
+
 var e2d map[*graphviz.Edge]string
 var ls map[*graphviz.Node]string
 var qs map[*graphviz.Edge]*list.List
+var ebrands map[*graphviz.Edge]ebrand
 var display *os.Process = nil
 var exit = -1
 
 func handle(cmd string, args []string, network *graphviz.Graph) (HandleR, string) {
 	switch cmd {
+	case "emark":
+		{
+			if len(args) == 2 {
+				args = append(args, "")
+			}
+			if len(args) == 3 {
+				args = append(args, "")
+			}
+			if len(args) != 4 {
+				return FAILURE, fmt.Sprintf("Usage: emark <from> <to> <color> <msg>")
+			}
+			_, edge := findEdge(network, args[0], args[1])
+			if edge == nil {
+				return FAILURE, fmt.Sprintf("[E] No edge from node %s to node %s", args[0], args[1])
+			}
+
+			eb := ebrand{color: args[2], msg: args[3]}
+			if eb.color == "" && eb.msg == "" {
+				delete(ebrands, edge)
+			} else {
+				ebrands[edge] = eb
+			}
+			qprocess(edge)
+		}
 	case "mark":
 		{
 			if len(args) != 2 {
@@ -168,6 +209,7 @@ func handle(cmd string, args []string, network *graphviz.Graph) (HandleR, string
 		{
 			e2d = make(map[*graphviz.Edge]string)
 			qs = make(map[*graphviz.Edge]*list.List)
+			ebrands = make(map[*graphviz.Edge]ebrand)
 			ls = make(map[*graphviz.Node]string)
 			for _, e := range network.Edges.Edges {
 				qs[e] = list.New()
@@ -205,6 +247,7 @@ func main() {
 
 	e2d = make(map[*graphviz.Edge]string)
 	qs = make(map[*graphviz.Edge]*list.List)
+	ebrands = make(map[*graphviz.Edge]ebrand)
 	ls = make(map[*graphviz.Node]string)
 
 	var spec []string

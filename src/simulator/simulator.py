@@ -245,12 +245,15 @@ class Net:
                 m('mark %s "%s"' % (node.name, msg))
             def label(msg, node=i):
                 m('label %s "%s"' % (node.name, msg))
+            def emark(to, color, msg, node=i):
+                m('emark %s %s "%s" "%s"' % (node.name, self.node(to).name, color, msg))
 
             i.obj.N = n
             i.obj.weights = i.weights
             i.obj.nbrs = i.Nbrs()
             i.obj.markcb = mark
             i.obj.labelcb = label
+            i.obj.emarkcb = emark
             i.obj.init()
 
         # connect outputless actions to environment

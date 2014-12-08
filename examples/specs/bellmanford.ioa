@@ -35,10 +35,15 @@ Transition-Name:
 Transition-Effect:
 	act = m[1] + self.weights[m[0]]
 	if self.dist is None or act < self.dist:
+		if self.parent is not None:
+			emark(self.parent, "", "")
+
 		self.dist = act
 		self.parent = m[0]
 		self.updated = []
+
 		label('%02d' % (self.dist))
+		emark(self.parent, "red", self.weights[m[0]])
 
 Tasks:
 	send(m)

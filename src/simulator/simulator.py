@@ -312,8 +312,9 @@ class Net:
         return n
 
 class Nbuilder:
-    def __init__(self, filename, usechan=True):
+    def __init__(self, filename, randid, usechan=True):
         self.fn = filename
+        self.randid = randid
         self.usechan = usechan
         self.chancount = 0
 
@@ -335,10 +336,25 @@ class Nbuilder:
         chanclass = chan.allclasses['Channel']
         k = allclass.keys()[0]
         n = gv.firstnode(g)
+        ns = 0
+        while n:
+            ns = ns + 1
+            n = gv.nextnode(g, n)
+
+        ids = range(ns)
+        if self.randid:
+            random.shuffle(ids)
+
+        n = gv.firstnode(g)
+        ni = 0
         while n:
             auto = allclass[k]()
             name = gv.nameof(n)
-            idd = auto.i
+
+            idd = ids[ni]
+            auto.i = idd
+            ni = ni + 1
+
             net.addnode(idd, SNode(idd, name, auto, \
               auto.actions(), auto.tasks()))
             n = gv.nextnode(g, n)
@@ -396,13 +412,13 @@ def ioinit(graphfile):
     # simulator prints go to stderr
     glob.console = sys.stderr
 
-def btest(graphfile, lim, st):
+def btest(graphfile, lim, st, randid):
 
     ioinit(graphfile)
 
     fn = graphfile
     log('reading %s...' % (fn))
-    n = Nbuilder(fn).go()
+    n = Nbuilder(fn, randid).go()
 
     #print n
     n.simstarting(lambda x: torender(x))
@@ -455,22 +471,25 @@ def maintest():
 
 if __name__ == '__main__':
 
+    randid = False
     graphfile = 'graph.gv'
     lim=1000
     st = 0.0
 
     args = sys.argv[1:]
     if args:
-        os, args = getopt.getopt(args, 'g:l:s:')
+        os, args = getopt.getopt(args, 'g:l:s:r')
         for o, a in os:
             if o == '-g':
                 graphfile = a
             if o == '-l':
                 lim = a
+            if o == '-r':
+                randid = True
             if o == '-s':
                 st = float(a)
         if len(args) > 0:
             print "Unknown trailing arguments: %s" % args
 
-    btest(graphfile, lim, st)
+    btest(graphfile, lim, st, randid)
     #maintest()

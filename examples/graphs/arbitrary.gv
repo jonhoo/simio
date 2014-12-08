@@ -1,6 +1,8 @@
 digraph {
   size="10,10!";
   ratio="fill";
+  node [shape=circle penwidth=2];
+  edge [fontsize=12];
   a1;
   a2;
   a3;

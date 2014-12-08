@@ -1,7 +1,7 @@
 digraph {
   size="10,10!";
   ratio="fill";
-  node [shape=Mrecord penwidth=2 fontname=DejaVuSansMono];
+  node [shape=Mrecord penwidth=2 fontname=monospace];
   edge [fontsize=12];
   start="50";
   a1;

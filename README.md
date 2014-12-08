@@ -27,3 +27,6 @@ This will open up a live view of the simulation in a new window, powered by the
 simio [renderer](src/renderer/src/renderer/). The `-s` option specifies the
 time delay between each step of the simulation, and allows speeding up or
 slowing down the visualization.
+
+The simulator's `STDOUT` will contain anything printed inside the running
+automaton instances, while `STDERR` will contain messages from the simulator.

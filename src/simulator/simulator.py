@@ -385,9 +385,9 @@ def ioinit(graphfile):
         ), graphfile],
         stdin=subprocess.PIPE)
     glob.render = renderer.stdin
+    # automata prints go to stdout
+    # simulator prints go to stderr
     glob.console = sys.stderr
-    # so automata prints go to stderr
-    sys.stdout = sys.stderr
 
 def btest(graphfile, lim, st):
 
@@ -409,6 +409,7 @@ def btest(graphfile, lim, st):
         if st:
             time.sleep(st)
 
+    sys.stdout = sys.stderr
     raw_input("Simulation ended; press enter to close renderer.")
     log('done')
 

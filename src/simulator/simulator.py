@@ -383,7 +383,8 @@ def ioinit(graphfile):
         'bin',
         'renderer'
         ), graphfile],
-        stdin=subprocess.PIPE)
+        stdin=subprocess.PIPE,
+        stdout=sys.stderr)
     glob.render = renderer.stdin
     # automata prints go to stdout
     # simulator prints go to stderr

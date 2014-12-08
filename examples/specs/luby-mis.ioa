@@ -59,6 +59,9 @@ Transition-Effect:
 Transition-Name:
 	rrandom(m)
 Transition-Effect:
+	if self.eliminated or self.selected:
+		return
+
 	self.rrand.append(m)
 	if len(self.rrand) == len(self.neighbourset):
 		print "%d has all %d randoms" % (self.i, len(self.neighbourset))
@@ -82,6 +85,9 @@ Transition-Effect:
 Transition-Name:
 	rselected(m)
 Transition-Effect:
+	if self.eliminated or self.selected:
+		return
+
 	self.rsel.append((fr, m))
 	if len(self.rsel) == len(self.neighbourset):
 		print "%d has all %d selected" % (self.i, len(self.neighbourset))
@@ -104,6 +110,9 @@ Transition-Effect:
 Transition-Name:
 	reliminated(m)
 Transition-Effect:
+	if self.eliminated or self.selected:
+		return
+
 	self.relim.append((fr, m))
 	if len(self.relim) == len(self.neighbourset):
 		print "%d has all %d eliminated" % (self.i, len(self.neighbourset))

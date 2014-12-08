@@ -54,7 +54,7 @@ func qprocess(edge *graphviz.Edge) {
 		}
 
 		if !ok || c.color == "" {
-			delete(edge.Attrs, "color")
+			edge.Attrs["color"] = "gainsboro"
 		} else {
 			edge.Attrs["color"] = c.color
 		}
@@ -245,11 +245,6 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Could not read graph description: %s\n", err)
 	}
 
-	e2d = make(map[*graphviz.Edge]string)
-	qs = make(map[*graphviz.Edge]*list.List)
-	ebrands = make(map[*graphviz.Edge]ebrand)
-	ls = make(map[*graphviz.Node]string)
-
 	var spec []string
 	var dot bytes.Buffer
 	spec = nil
@@ -277,10 +272,7 @@ func main() {
 		panic(e)
 	}
 	network := graphviz.NewAnalysedGraph(tmpn).(*graphviz.Graph)
-
-	for _, e := range network.Edges.Edges {
-		qs[e] = list.New()
-	}
+	handle("erase", nil, network)
 
 	var start []*graphviz.Node
 	start = nil

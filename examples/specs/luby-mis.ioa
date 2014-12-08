@@ -19,7 +19,7 @@ Signature-Output:
 State:
 	import random
 	self.neighbourset = self.nbrs
-	self.rand = random.random()
+	self.rand = random.randint(1, 100)
 	self.selected = False
 	self.eliminated = False
 	self.sendq = [('random', n, self.rand) for n in self.nbrs]
@@ -118,7 +118,7 @@ Transition-Effect:
 		else:
 			import random
 			print "%d is restarting" % (self.i)
-			self.rand = random.random()
+			self.rand = random.randint(1,100)
 			self.sendq.extend([('random', j, self.rand) for j in self.neighbourset])
 	else:
 		print "%d has %d/%d eliminated" % (self.i, len(self.relim), len(self.neighbourset))

@@ -409,6 +409,7 @@ def btest(graphfile, lim, st):
         if st:
             time.sleep(st)
 
+    raw_input("Simulation ended; press enter to close renderer.")
     log('done')
 
 def maintest():

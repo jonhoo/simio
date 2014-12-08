@@ -11,34 +11,34 @@ digraph {
   a6;
   a7;
 
-  a1 -> a2 [weight = 4];
-  a1 -> a3 [weight = 3];
-  a1 -> a5 [weight = 10];
-  a1 -> a6 [weight = 9];
+  a1 -> a2
+  a1 -> a3
+  a1 -> a5
+  a1 -> a6
 
-  a2 -> a1 [weight = 4];
-  a2 -> a3 [weight = 12];
-  a2 -> a4 [weight = 5];
-  a2 -> a5 [weight = 15];
+  a2 -> a1
+  a2 -> a3
+  a2 -> a4
+  a2 -> a5
 
-  a3 -> a1 [weight = 3];
-  a3 -> a2 [weight = 12];
-  a3 -> a5 [weight = 18];
-  a3 -> a6 [weight = 17];
-  a3 -> a7 [weight = 10];
+  a3 -> a1
+  a3 -> a2
+  a3 -> a5
+  a3 -> a6
+  a3 -> a7
 
-  a4 -> a2 [weight = 5];
-  a4 -> a7 [weight = 1];
+  a4 -> a2
+  a4 -> a7
 
-  a5 -> a1 [weight = 10];
-  a5 -> a2 [weight = 15];
-  a5 -> a3 [weight = 18];
-  a5 -> a7 [weight = 19];
+  a5 -> a1
+  a5 -> a2
+  a5 -> a3
+  a5 -> a7
 
-  a6 -> a1 [weight = 9];
-  a6 -> a3 [weight = 17];
+  a6 -> a1
+  a6 -> a3
 
-  a7 -> a3 [weight = 10];
-  a7 -> a4 [weight = 1];
-  a7 -> a5 [weight = 19];
+  a7 -> a3
+  a7 -> a4
+  a7 -> a5
 }

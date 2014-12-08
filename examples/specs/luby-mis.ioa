@@ -116,9 +116,11 @@ Transition-Effect:
 	self.relim.append((fr, m))
 	if len(self.relim) == len(self.neighbourset):
 		print "%d has all %d eliminated" % (self.i, len(self.neighbourset))
+		newnbrs = []
 		for j in self.neighbourset:
-			if (j, True) in self.relim:
-				self.neighbourset.remove(j)
+			if (j, True) not in self.relim:
+				newnbrs.append(j)
+		self.neighbourset = newnbrs
 		self.relim = []
 		if len(self.neighbourset) == 0:
 			print "%d: 3.1" % (self.i)

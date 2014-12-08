@@ -1,16 +1,18 @@
 digraph {
-  size="5,5!";
+  size="7,7!";
   ratio="fill";
   node [shape=circle penwidth=2];
   edge [fontsize=12 penwidth=2];
-  start="100";
+  start="32";
   a1;
   a2;
   a3;
   a4;
+  a5;
 
   a1 -> a2;
   a2 -> a3;
   a3 -> a4;
-  a4 -> a1;
+  a4 -> a5;
+  a5 -> a1;
 }

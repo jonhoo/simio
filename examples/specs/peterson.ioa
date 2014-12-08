@@ -7,8 +7,6 @@ Name:
 
 Signature-Input:
 	receive(m)
-Signature-Internal:
-	process
 Signature-Output:
 	send(m) connect receive
 
@@ -80,14 +78,13 @@ Transition-Effect:
 		print "%d (now %d) gets second probe %s" % (self.i, self.cid, m)
 		self.probe2 = m[1]
 
-
 	# Our token passed around, we win!
 	if self.probe1 == self.cid:
 		print self.i, "is the leader"
 		# Show that we're the leader
 		self.markcb("green")
 	# We saw a winning token, adopt it and start a new phase
-	if self.probe1 > self.cid and self.probe1 > self.probe2:
+	elif self.probe1 > self.cid and self.probe1 > self.probe2:
 		print "%d adopts cid %d (formerly %d)" % (self.i, self.probe2, self.cid)
 		self.cid = self.probe2
 		self.phase = self.phase + 1
@@ -101,6 +98,7 @@ Transition-Effect:
 		self.active = False
 		self.sendq.extend(self.received)
 		self.received = []
+		self.markcb("gray")
 
 Tasks:
 	send(m)

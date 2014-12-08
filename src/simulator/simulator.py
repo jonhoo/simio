@@ -6,7 +6,8 @@ import random
 import sys
 import time
 
-# use the parser to generate wtf
+# use the parser to generate wtf.py
+sys.path.append('.')
 import wtf
 import chan
 
@@ -376,7 +377,7 @@ def ioinit(graphfile):
     import subprocess
     # start renderer
     renderer = subprocess.Popen([os.path.join(
-        os.path.dirname(sys.argv[1]),
+        os.path.dirname(sys.argv[0]),
         '..',
         'renderer',
         'bin',

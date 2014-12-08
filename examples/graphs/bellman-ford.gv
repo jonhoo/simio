@@ -4,15 +4,15 @@ digraph {
   node [shape=Mrecord penwidth=2 fontname=monospace];
   edge [fontsize=12];
   start="50";
-  a1 [label = "a1 | xx"];
-  a2 [label = "a2 | xx"];
-  a3 [label = "a3 | xx"];
-  a4 [label = "a4 | xx"];
-  a5 [label = "a5 | xx"];
-  a6 [label = "a6 | xx"];
-  a7 [label = "a7 | xx"];
-  a8 [label = "a8 | xx"];
-  a9 [label = "a9 | xx"];
+  a1 [label = "a1 | --"];
+  a2 [label = "a2 | --"];
+  a3 [label = "a3 | --"];
+  a4 [label = "a4 | --"];
+  a5 [label = "a5 | --"];
+  a6 [label = "a6 | --"];
+  a7 [label = "a7 | --"];
+  a8 [label = "a8 | --"];
+  a9 [label = "a9 | --"];
 
   a1 -> a3 [weight = 3];
   a1 -> a6 [weight = 9];

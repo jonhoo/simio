@@ -19,7 +19,7 @@ State:
 		mark("red")
 		self.dist = 0
 	else:
-		label("xx")
+		label("--")
 
 Transition-Name:
 	send(m)

@@ -1,5 +1,5 @@
 digraph {
-  size="5,5!";
+  size="8,8!";
   ratio="fill";
   a1;
   a2;

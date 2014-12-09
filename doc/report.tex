@@ -190,8 +190,8 @@ order.
 As it turns out, this scheduler cannot produce many valid executions of the
 system since the asynchronous I/O automata model places no constraints on how
 often the automata execute transitions relative to each other.
-Simio's scheduler is random -- any enabled action of any automaton may executed
-at any time.
+Simio's scheduler is random -- any enabled action of any automaton may be
+executed at any time.
 This design choice was made for two reasons.
 First, given a decent psuedo random number generator, a random scheduler is
 also a fair scheduler.

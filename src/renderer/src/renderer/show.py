@@ -13,8 +13,11 @@ class ProcessTransientFile(pyinotify.ProcessEvent):
 		img.set_from_file(f)
 		return False
 
+	def process_IN_MOVED_TO(self, event):
+		if event.pathname == f:
+			gobject.idle_add(self.update_img, event.pathname)
+
 	def process_IN_CREATE(self, event):
-		# We have explicitely registered for this kind of event.
 		if event.pathname == f:
 			gobject.idle_add(self.update_img, event.pathname)
 
@@ -36,7 +39,8 @@ if __name__ == '__main__':
 	wm = pyinotify.WatchManager()
 	notifier = pyinotify.ThreadedNotifier(wm, ProcessTransientFile())
 	notifier.start()
-	wm.add_watch(os.path.dirname(sys.argv[1]), pyinotify.IN_CREATE)
+	wm.add_watch(os.path.dirname(sys.argv[1]), pyinotify.IN_CREATE | pyinotify.IN_MOVED_TO)
+	#wm.add_watch(os.path.dirname(sys.argv[1]), pyinotify.ALL_EVENTS)
 
 	import signal
 	signal.signal(signal.SIGINT, signal.SIG_DFL)

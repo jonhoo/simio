@@ -1,7 +1,11 @@
 \documentclass{scrartcl}
-\usepackage{framed}
-\usepackage{hyperref}
 \usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{caption, subcaption}
+
+\usepackage{framed}
+\usepackage{svg}
+\setsvg{svgpath = figures/}
+
 \def \kw#1{\texttt{\color{MidnightBlue}#1}}
 \def \self {\texttt{\color{Cerulean}self}}
 \def \py#1{\texttt{\color{LimeGreen}#1}}
@@ -68,9 +72,9 @@ design of the simulator, its limitations, and some observations about its uses.
 We wanted our I/O automaton specifications to resemble the style of the
 pseudo-code that I/O automata are usually given in literature. In particular,
 we based our design on the format used in the well-known Nancy Lynch's
-Distributed Algorithm book. Contrary to other, exisisting simulators that
-develop a new language entirely for specifying these automata so that formal
-verification of their behaviour can be performed, we opted to sacrifice
+Distributed Algorithm book\cite{book}. Contrary to other, exisisting simulators
+that develop a new language entirely for specifying these automata so that
+formal verification of their behaviour can be performed, we opted to sacrifice
 formalism for flexibility. Our specifications are given in Python, with some
 added syntactic constructs for communicating the role of different code
 segments to the simulator. This gives users the ability to use all existing
@@ -99,7 +103,7 @@ Of particular note is the use of the \kw{connect} keyword in the
 from this particular transition should be fed into the indicated input
 transition of a neighbouring node in the simulated network.
 
-\begin{figure}\label{alg:1}
+\begin{figure}
 \begin{framed}
 \begingroup
 \parindent=0pt\relax
@@ -147,7 +151,7 @@ transition of a neighbouring node in the simulated network.
     send(m)
 \endgroup
 \end{framed}
-\caption{Simio description of Bellman-Ford}
+\caption{Simio description of Bellman-Ford}\label{alg:1}
 \end{figure}
 
 We note that the code reads very similar to a formal I/O automaton
@@ -155,7 +159,7 @@ specification, which is one of Simio's goals. Simio now takes such an automaton
 specification and parses it into an executable Python module, which is then
 used by the simulator to run multiple nodes connected in a network.
 
-\section{Simulation}
+\section{Simulation}\label{sec:sim}
 
 Distributed algorithms are notoriously difficult to understand.
 Sometimes observing the behavior of an algorithm aides in understanding more
@@ -192,79 +196,119 @@ time.
 
 \section{Related work}
 
-{\color{red}Progress marker}
+I/O automata are used widely in the distributed systems theory community, and
+several simulators exist. Of particular note is the IOA Language and
+Toolset\cite{ioa}, which simulates the behaviour of a single I/O automaton, and
+the Tempo Toolkit\cite{tempo}, which simulates a single \textit{timed} I/O
+automaton. These tools provide the user with a domain-specific language for
+describing automata, as well as tools for simulating the operation of a single
+automaton, doing invariant checking, verifying liveness and safety properties,
+and generating code.
 
-Of particular note in terms of related work are the
-\href{http://groups.csail.mit.edu/tds/ioa/}{IOA Language and Toolset}, which
-simulates the behaviour of a single I/O automata, and the
-\href{http://www.veromodo.com/}{Tempo Toolset}, which simulates a single
-*timed* I/O automata. These tools provide the user with a domain-specific
-language for describing automata, as well as tools for simulating the operation
-of a single automata, doing invariant checking, verifying liveness and safety
-properties, and generating code.
-
-While these both provide authors of automata with powerful tools for verifying
-the correctness of their algorithms, they are not particularly useful for
-users who want to study the behaviour of an automata so as to better understand
-the underlying algorithm. In particular, we envision that students who are
-being introduced to reasoning about distributed systems using I/O automata for
-the first time, or seasoned researchers toying with an idea for a new
-algorithm, would benefit greatly from being able to see how a network of nodes
-behaves when running a specific algorithm. Furthermore, we believe that, by
-allowing the user to specify the network graph they are interested in, they can
-quickly explore corner cases that they suspect might be difficult for the
-algorithm, or they can improve their understanding of the algorithm by
+While these both provide authors with powerful tools for verifying the
+correctness of their algorithms, they are not particularly useful for users who
+want to study the behaviour of an I/O automaton so as to better understand the
+underlying algorithm. As mentioned previously, we envision that students who
+are being introduced to the field of distributed systems theory and I/O
+automata for the first time, or seasoned researchers prototyping an idea for a
+new algorithm, would benefit greatly from being able to \textit{see} how a
+network of nodes behave when running some algorithm. Furthermore, we believe
+that, by allowing the user to specify the network graph they are interested in,
+they can quickly explore corner cases that they suspect might be difficult for
+the algorithm, or they can improve their understanding of the algorithm by
 observing its behaviour in very different network topologies.
 
 Another reason why we feel existing solutions are insufficient is that they
 require the user to learn a new programming language simply to be able to type
-up an algorithm. Instead, we propose to provide the user with the ability to
-define their automata using the high-level programming language Python, which
-many computer scientists are already familiar with. State variables will be
-represented as Python variables, giving the user access to the suite of
-primitive types and classes provided by Python and its many third-party
-modules, without having to implement all these types ourselves. In the same
-vein, transitions will be specified as pure Python functions whose arguments
-are the current state variables, as well as any transition inputs, and whose
-return value will be the new state of the object. Modeling transitions this way
-allows us to give the full power of the Python language to the user, without
-incurring additional implementation cost for us.
+up an algorithm. Instead, Simio provides the user with the ability to define
+their automata using the high-level programming language Python, which many
+computer scientists are already familiar with. This gives users access to the
+suite of primitive types, classes and functions provided by Python and its many
+third-party modules, without forcing us to re-develop this infrastructure
+ourselves.
 
-\section{Challenges}
+\section{Limitations}
 
 The flexibility of expression in our system means that doing formal verification
 or analysis of the automata becomes difficult. We surmise that this is the
 reason why previous work generally chose to implement a language from scratch;
 it gives them the opportunity to limit the language to only provide features
 that can be reasoned about using current program analysis techniques. We
-therefore position our simulator as a complement to existing tools, rather than
+therefore position our simulator as a supplement to existing tools, rather than
 as a replacement for them. In particular, we anticipate that users will first
 prototype their automata in our simulator to examine their behaviour, and then,
 once the algorithm has been sufficiently well refined, write their final
-automata specification using a specialized language such as Tempo so that
+automata specification using a specialized language such as Tempo, so that
 formal methods can be used to prove properties of the final algorithm.
 
-\section{Project status}
+As described in Section~\ref{sec:sim}, Simio currently only supports the
+scenario where all the nodes in the network are running instances of the same
+I/O automaton. This is not an inherent limitation of I/O automata, but rather a
+choice we have made to simplify implementation. Our choice not to support this
+feature effectively prohibits users from composing automata, and potentially
+forces them to specify larger and more complex automata to emulate this kind of
+behaviour in our system.
 
-At this stage in the project's development, we have built rudimentary support
-for specifying automata, as well as a visualizing front-end that can display
-nodes in a network, as well as show communication between nodes. While these
-will both likely need further refinement, they are at the stage where we can
-now focus on building a working automata simulator. This simulator would first
-invoke the parser to get an executable version of the automata, construct and
-initialize several copies of the automata to correspond to each of the nodes in
-the simulated network, and link each automata as dictated by the network graph
-specification. Once this setup has been performed, it would then start
-executing the automata concurrently, ensuring fairness to each automata's task.
-The information about messages being sent and nodes changing state would then
-be communicated to the rendered in real-time, so that the visualization of the
-running algorithm can be produced.
+Simio, at the time of writing, is also limited to simulating nodes in networks.
+Distributed shared memory systems are very similar, and open up the world of
+visualized simulations to a whole new class of algorithms, but unfortunately,
+time constraints prevent us from supporting this in the current version of
+Simio.
 
-We anticipate that the biggest hurdle to making the simulator will be finding a
-good way of handling non-determinism in the simulated automata while still
-providing fairness. The reason for this is that a user may wish to bias the
-non-determistic choices to force the algorithm to behave in a particular way.
-It is not obvious how this can be done in a way that is both easy for the user,
-and, at the same time, does not get in the way of the simulator ensuring that
-the overall execution remains fair.
+\section{Visualizations}
+
+Simio uses the popular Graphviz library\cite{gv} to render the nodes and edges
+in the network, as well as to convey information about the current state of the
+simulation. Figure~\ref{fig:viz} shows the rendered visualization at various
+stages throughout the simulation of Bellman-Ford on an arbitrary graph.
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b]{0.49\textwidth}
+		\includesvg[width=\textwidth]{start}
+		\caption{Root broadcast}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.49\textwidth}
+		\includesvg[width=\textwidth]{one-hop}
+		\caption{Node forwards}
+	\end{subfigure}
+	\\
+	\begin{subfigure}[b]{0.49\textwidth}
+		\includesvg[width=\textwidth]{far}
+		\caption{Algorithm progresses}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.49\textwidth}
+		\includesvg[width=\textwidth]{end}
+		\caption{Algorithm terminates}
+	\end{subfigure}
+	\caption{Steps of Bellman-Ford. Red arrows indicate parent pointers,
+		blue arrows indicates messages being sent across channels. The
+		full simulator also shows node identifiers and current best
+		distance estimates, but these have been omitted for clarity.}\label{fig:viz}
+\end{figure}
+
+The visualization is arguably much more striking when seen live, so we invite
+the initiated reader to download a copy of Simio and run the Bellman-Ford demo
+using \texttt{examples/demo/bellmanford.sh} to see Simio in action.
+
+\section{Code release}
+
+The souce code for Simio has been released open-souce on GitHub\cite{simio}.
+The release includes working I/O automata implementations of, as well as demos
+for, the Bellman-Ford algorithm, Peterson's algorithm for leader-election in
+unidirectional rings\cite{peterson}, the Paxos leader election
+algorithm\cite{paxos}, and Michael Luby's algorithm for determining the Maximal
+Independent Set of a graph\cite{lubymis}.
+
+\begin{thebibliography}{1}
+\bibitem{book} Nancy A. Lynch.\@ 1996.\@ {\em Distributed Algorithms}.\@ Morgan Kaufmann Publishers Inc., San Francisco, CA, USA. 
+\bibitem{ioa} MIT Theory of Distributed Systems Group.\@ IOA Language and Toolset.\@ http://groups.csail.mit.edu/tds/ioa/
+\bibitem{tempo} Veromodo.\@ The Tempo Toolkit.\@ http://www.veromodo.com/
+\bibitem{gv} Graphviz.\@ Graph Visualization Software.\@ http://graphviz.org/
+\bibitem{simio} GitHub.\@ Simio source code.\@ https://github.com/jonhoo/simio
+
+\bibitem{paxos} Leslie Lamport.\@ 1998.\@ {\em The part-time parliament}.\@ ACM Trans.  Comput. Syst. 16, 2 (May 1998), 133-169.
+\bibitem{peterson} Gary L. Peterson.\@ 1982.\@ {\em An O(nlog n) Unidirectional Algorithm for the Circular Extrema Problem}.\@ ACM Trans. Program. Lang.  Syst. 4, 4 (October 1982), 758-762.
+\bibitem{lubymis} M Luby.\@ 1985.\@ {\em A simple parallel algorithm for the maximal independent set problem}.\@ In Proceedings of the seventeenth annual ACM symposium on Theory of computing (STOC '85). ACM, New York, NY, USA, 1-10.
+\end{thebibliography}
 \end{document}

@@ -368,17 +368,23 @@ class Nbuilder:
         ret.chanid = (fid, tid)
         return ret
 
-def ioinit(graphfile):
+def ioinit(graphfile, trace):
     import os
     import subprocess
     # start renderer
-    renderer = subprocess.Popen([os.path.join(
+    args = [os.path.join(
         os.path.dirname(sys.argv[0]),
         '..',
         'renderer',
         'bin',
         'renderer'
-        ), graphfile],
+        )]
+
+    if trace:
+        args.append("-t")
+    args.append(graphfile)
+
+    renderer = subprocess.Popen(args,
         stdin=subprocess.PIPE,
         stdout=sys.stderr)
     glob.render = renderer.stdin
@@ -386,9 +392,9 @@ def ioinit(graphfile):
     # simulator prints go to stderr
     glob.console = sys.stderr
 
-def btest(graphfile, lim, st, randid):
+def btest(graphfile, lim, st, randid, trace):
 
-    ioinit(graphfile)
+    ioinit(graphfile, trace)
 
     fn = graphfile
     log('reading %s...' % (fn))
@@ -445,6 +451,7 @@ def maintest():
 
 if __name__ == '__main__':
 
+    trace = False
     randid = False
     graphfile = 'graph.gv'
     lim=1000
@@ -452,12 +459,14 @@ if __name__ == '__main__':
 
     args = sys.argv[1:]
     if args:
-        os, args = getopt.getopt(args, 'g:l:s:r')
+        os, args = getopt.getopt(args, 'g:l:s:rt')
         for o, a in os:
             if o == '-g':
                 graphfile = a
             if o == '-l':
                 lim = a
+            if o == '-t':
+                trace = True
             if o == '-r':
                 randid = True
             if o == '-s':
@@ -465,5 +474,5 @@ if __name__ == '__main__':
         if len(args) > 0:
             print "Unknown trailing arguments: %s" % args
 
-    btest(graphfile, lim, st, randid)
+    btest(graphfile, lim, st, randid, trace)
     #maintest()

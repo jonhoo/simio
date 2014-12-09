@@ -2,6 +2,7 @@
 current.svg
 next.svg
 wtf.py
+iteration-*.svg
 
 # Python compiled files
 *.pyc

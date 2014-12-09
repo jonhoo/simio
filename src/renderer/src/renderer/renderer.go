@@ -83,6 +83,7 @@ var qs map[*graphviz.Edge]*list.List
 var ebrands map[*graphviz.Edge]ebrand
 var display *os.Process = nil
 var exit = -1
+var trace = false
 
 func handle(cmd string, args []string, network *graphviz.Graph) (HandleR, string) {
 	switch cmd {
@@ -234,13 +235,19 @@ func q(i string) string {
 }
 
 func main() {
-	if len(os.Args) != 2 {
+	if len(os.Args) < 2 {
 		fmt.Fprintf(os.Stderr, "No network graph description given\n")
 		os.Exit(2)
 		return
 	}
 
-	data, err := ioutil.ReadFile(os.Args[1])
+	gi := 1
+	if len(os.Args) == 3 && os.Args[1] == "-t" {
+		trace = true
+		gi = 2
+	}
+
+	data, err := ioutil.ReadFile(os.Args[gi])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not read graph description: %s\n", err)
 	}
@@ -352,6 +359,7 @@ func iterate(g *graphviz.Graph, command string) {
 }
 
 var started = false
+var ci = 0
 
 func plot(g *graphviz.Graph) error {
 	w, e := os.Create("next.svg")
@@ -372,7 +380,27 @@ func plot(g *graphviz.Graph) error {
 		return cmde
 	}
 
-	e = os.Rename("next.svg", "current.svg")
+	if _, e := os.Lstat("current.svg"); e == nil || !os.IsNotExist(e) {
+		e = os.Remove("current.svg")
+		if e != nil {
+			return e
+		}
+	} else {
+		fmt.Println(e)
+	}
+
+	if trace {
+		it := fmt.Sprintf("iteration-%04d.svg", ci)
+		ci++
+		e = os.Rename("next.svg", it)
+		if e != nil {
+			return e
+		}
+		e = os.Symlink(it, "current.svg")
+	} else {
+		e = os.Rename("next.svg", "current.svg")
+	}
+
 	if e != nil {
 		return e
 	}

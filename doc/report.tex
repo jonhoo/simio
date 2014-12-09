@@ -161,47 +161,53 @@ used by the simulator to run multiple nodes connected in a network.
 
 \section{Simulation}\label{sec:sim}
 
-%Distributed algorithms are notoriously difficult to understand.
-%Sometimes observing the behavior of an algorithm aides in understanding more
-%than pseudo code or an informal description.
-%To this end, Simio simulates distributed algorithms in order to demonstrate to
-%the student the exact behavior of arbitrary algorithms in arbitrary network
-%topologies.
-
 The simulator takes as input both the output of the parser and a description of
-a (directional) graph.
-This input is then used as follows.
-First, the simulator builds the simulation network where each node in the input
-graph represents an automaton of the type specified in the parser output.
-Each of these nodes is filled in which information available under the
-asynchronous I/O automata model such as graph neighbors and per-node unique
-identifier.
+a (directional) graph. This input is then used to execute a simulation as
+follows. First, the simulator builds the simulation network, where each node in
+the input graph represents an automaton of the type specified in the parser
+output. Each of these nodes is then given information that is usually assumed
+to be known to each node under the asynchronous I/O automata model; this
+includes the number of nodes in the graph, the set of neighbouring nodes,
+weights of adjancent edges, and per-node unique identifiers.
+
 Next, channels are inserted between each pair of nodes that are connected by an
-edge in the graph.
-Channels are also represented by a Simio specification and thus completely
-configurable.
-Finally, the simulator repeatedly executes exactly one enabled action at a time
-until no more enabled actions remain.
+edge in the graph. Channels are also represented internally by a Simio
+specification and are thus completely configurable. The channels are subject to
+the same scheduling (discussed below) as the user-defined automata. The
+simulator then repeatedly executes exactly one enabled action at a time until
+no more enabled actions remain.
 
 The way in which the simulator chooses the next action to run (the
-``scheduler'') is an important part of the simulator.
-Consider a naive scheduler that simply executes automata actions in round-robin
-order.
-As it turns out, this scheduler cannot produce many valid executions of the
-system since the asynchronous I/O automata model places no constraints on how
-often the automata execute transitions relative to each other.
-Simio's scheduler is random -- any enabled action of any automaton may be
-executed at any time.
-This design choice was made for two reasons.
-First, given a decent psuedo random number generator, a random scheduler is
-also a fair scheduler.
+``scheduler'') is an important part of the simulator, and warrants some
+explanation. As a strawman example, consider a naive scheduler that simply
+executes automaton actions in round-robin order; every step, it will consider
+only the enabled transitions of node $n+1$. This effectively forces the nodes
+to advance in lock-step with each other, and will fail to ever simulate
+executions in which one node takes multiple steps while another node takes
+none. Since these are the interesting cases for many distributed algorithms
+(the problem otherwise reduces to something akin to the synchronous setting),
+this scheduler is not particularly useful.
+
+The asynchronous I/O automaton model places no constraints on how often the
+automata execute transitions relative to each other. For Simio, we therefore
+decided to make our scheduler random --- any enabled action of any automaton
+may executed at any time. This design choice was made for two reasons:
+First, given a decent random number generator, a random scheduler is guaranteed
+to be a fair scheduler; each node will take a step with some non-zero
+probability in each round, meaning it must eventually take a step as the number
+of steps tend to infinity. This argument extends to the statement that any
+enabled action must occur infinitely often, which is sufficient to show
+fairness.
+
 Second, executing actions in a random order preserves the uncertainty that is
-inherent in the asynchronous I/O automata model.
-Realistic and common delays like link latency and CPU scheduling, which robust
-distrbuted algorithms must take into account, are approximated since actions
-can be interleaved arbitrarily.
-Thus the random scheduler is a good fit for a simulator since it demonstrates
-realistic behavior to the student.
+inherent in the asynchronous I/O automaton model. Realistically, nodes run at
+different speeds, and common delays such as link latency and CPU scheduling
+affect the relative ordering of events at different nodes, a fact which robust
+distrbuted algorithms must take into account. These effects are approximated by
+a random scheduler, since actions can now be interleaved arbitrarily. We
+believe the random scheduler is thus a good fit for a simulator, since it
+exposes realistic behavior to the student, and precisely because no two
+executions will be the same.
 
 \section{Related work}
 
@@ -262,7 +268,18 @@ Simio, at the time of writing, is also limited to simulating nodes in networks.
 Distributed shared memory systems are very similar, and open up the world of
 visualized simulations to a whole new class of algorithms, but unfortunately,
 time constraints prevent us from supporting this in the current version of
-Simio.
+Simio. Networks where nodes fail or messages are lost also fall into this
+category, as they are effectively different systems in which algorithms can
+run. We are leaving such alternative system models as future work.
+
+A final limitation that is also an intentional design choice, is that the user
+is not able to specify the scheduling of messages and transitions. Instead, we
+have chosen, as discussed above, to completely randomize the scheduling
+behaviour of the simulator. While we may add this feature in the future, we
+believe it is more important to expose the user to many \textit{different} runs
+of the algorithm, than it is to let them force a particular behaviour. Simio is
+built to explore and develop an understanding for algorithms, not as an
+exhaustive algorithm testing tool.
 
 \section{Visualizations}
 

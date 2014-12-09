@@ -161,12 +161,12 @@ used by the simulator to run multiple nodes connected in a network.
 
 \section{Simulation}\label{sec:sim}
 
-Distributed algorithms are notoriously difficult to understand.
-Sometimes observing the behavior of an algorithm aides in understanding more
-than pseudo code or an informal description.
-To this end, Simio simulates distributed algorithms in order to demonstrate to
-the student the exact behavior of arbitrary algorithms in arbitrary network
-topologies.
+%Distributed algorithms are notoriously difficult to understand.
+%Sometimes observing the behavior of an algorithm aides in understanding more
+%than pseudo code or an informal description.
+%To this end, Simio simulates distributed algorithms in order to demonstrate to
+%the student the exact behavior of arbitrary algorithms in arbitrary network
+%topologies.
 
 The simulator takes as input both the output of the parser and a description of
 a (directional) graph.
@@ -190,9 +190,18 @@ order.
 As it turns out, this scheduler cannot produce many valid executions of the
 system since the asynchronous I/O automata model places no constraints on how
 often the automata execute transitions relative to each other.
-In order to expose the user to as many valid executions as possible, Simio's
-scheduler is random -- any enabled action of any automaton may executed at any
-time.
+Simio's scheduler is random -- any enabled action of any automaton may executed
+at any time.
+This design choice was made for two reasons.
+First, given a decent psuedo random number generator, a random scheduler is
+also a fair scheduler.
+Second, executing actions in a random order preserves the uncertainty that is
+inherent in the asynchronous I/O automata model.
+Realistic and common delays like link latency and CPU scheduling, which robust
+distrbuted algorithms must take into account, are approximated since actions
+can be interleaved arbitrarily.
+Thus the random scheduler is a good fit for a simulator since it demonstrates
+realistic behavior to the student.
 
 \section{Related work}
 

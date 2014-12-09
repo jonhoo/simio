@@ -1,0 +1,239 @@
+\documentclass{scrartcl}
+\usepackage{framed}
+\usepackage{hyperref}
+\usepackage[usenames,dvipsnames]{xcolor}
+\def \kw#1{\texttt{\color{MidnightBlue}#1}}
+\def \self {\texttt{\color{Cerulean}self}}
+\def \py#1{\texttt{\color{LimeGreen}#1}}
+\def \pyval#1{\texttt{\color{Sepia}#1}}
+
+\title{6.852 Project Report}
+\subtitle{A Visual Simulator for I/O Automata}
+\author{Jon Gjengset \and Cody Cutler}
+
+\begin{document}
+
+\maketitle
+\begin{abstract}
+	Designing and implementing correct distributed, asynchronous algorithms
+	is hard, and understanding an algorithm designed by other people
+	especially so. Newcomers to the field face unfamiliar concepts and
+	terminology when being introduced to these kinds of algorithms, and
+	deriving intuition about why these algorithms work solely from their
+	algorithmic descriptions can be far from trivial. We present Simio; a
+	simulator for I/O automata that visualize the behaviour of distributed
+	algorithms in network graphs specified by the user. The automata are
+	specified using the popular Python programming language, making it easy
+	for students of distributed algorithms to code up and simulate new
+	algorithms. We believe this tool will aid in developing understanding
+	about the behaviour of algorithms, as well as serve as a quick
+	prototyping tool to test whether a propsed algorithm may solve some
+	problem.
+\end{abstract}
+
+\section{Introduction}
+Distributed algorithms are frequently described in terms of a particular I/O
+automaton that defines the behaviour of some set of nodes in a system. These
+automata are used heavily in distributed algorithm theory to reason about and
+prove properties of various algorithms, and can be used in a variety of
+systems.
+
+An I/O automaton specifies a set of state variables for each node in the
+system, as well as a series of transitions with preconditions and effects that
+take a node from one state to another, and one instance of such an atomaton can
+be seen much as a state machine. When multiple such automata instances are
+connected (e.g.\ through a network or distibuted shared memory), the output of
+one automaton can induce state transitions on another automaton. This is what
+enables I/O automata to encapsulate a distributed algorithm.
+
+Intuitively understanding the behaviour of an algorithm when specified through
+an I/O automaton alone can be difficult, as it is the combined behaviour of
+many nodes that the reader is usually interested in. While several simulators
+exist that simulate a single automaton (usually by having it interact directly
+with an ``environment automaton'' specified by the user), these are not
+directly useful for observing the overall behaviour of the algorithm.
+
+While this kind of simulation is sufficient for individuals familiar with the
+algorithms in question who want to verify some aspect of the automaton's
+behaviour, it is of less use to users who wish to understand some new,
+unfamiliar algorithm. For this project, we developed Simio, an I/O automaton
+simulator that simulates \textbf{and visualizes} the behaviour of a
+user-specified I/O automaton in a network. We hope this tool can be used by
+students of the field to gain a better understanding of the overall behaviour
+of various algorithms, and explore how they work in different scenarios. The
+following report details the specification langauge for the automata, the
+design of the simulator, its limitations, and some observations about its uses.
+
+\section{I/O automaton specifications}
+We wanted our I/O automaton specifications to resemble the style of the
+pseudo-code that I/O automata are usually given in literature. In particular,
+we based our design on the format used in the well-known Nancy Lynch's
+Distributed Algorithm book. Contrary to other, exisisting simulators that
+develop a new language entirely for specifying these automata so that formal
+verification of their behaviour can be performed, we opted to sacrifice
+formalism for flexibility. Our specifications are given in Python, with some
+added syntactic constructs for communicating the role of different code
+segments to the simulator. This gives users the ability to use all existing
+Python libraries and data-types without requiring us to do extra work to make
+them work.
+
+To illustrate, we give the specification for the well-known Bellman-Ford
+algorithm for computing the shortest path from a particular node to every other
+node in a graph in Figure~\ref{alg:1}. The keywords highlighted in \kw{blue}
+are recognized by our parser, and are used to denote the different sections of
+an automaton. Text inside the \kw{State}, \kw{Transition-Precondition},
+\kw{Transition-Output} and \kw{Transition-Effect} blocks are all pure Python
+code.
+
+The code in these blocks are given access to the current instance of the
+automaton (i.e.\ its current state) through the \self\ variable, and are
+expected to return a value appropriate to the containing block. For example,
+the code in a \kw{Transition-Precondition} block is expected to return true
+when the transition is enabled, and false otherwise. There are also certain
+special variables such as \kw{self.i}; the node's unique identifier, \kw{to};
+the destination node being considered for an output transition, and \kw{fr};
+the sender of a message received by an input transition.
+
+Of particular note is the use of the \kw{connect} keyword in the
+\kw{Signature-Output} block. This is a hint to the simulator that the outputs
+from this particular transition should be fed into the indicated input
+transition of a neighbouring node in the simulated network.
+
+\begin{figure}\label{alg:1}
+\begin{framed}
+\begingroup
+\parindent=0pt\relax
+\setlength{\parskip}{2pt}
+\footnotesize
+\ttfamily
+\obeyspaces%
+\let =\ %
+\obeylines%
+\kw{Name}:
+    BellmanFord
+
+\kw{Signature-Input}:
+    receive(m)
+
+\kw{Signature-Output}:
+    send(m) \kw{connect} receive
+
+\kw{State}:
+    \self.parent = \pyval{None}
+    \self.updated = []
+    \self.dist = \pyval{None}
+    \py{if} \kw{self.i} == \pyval{0}:
+        \self.dist = \pyval{0}
+
+\kw{Transition-Name}:
+    send(m)
+\kw{Transition-Precondition}:
+    \py{return} \self.dist \py{is} \py{not} \pyval{None} \py{and} \kw{to} \py{not} \py{in} \self.updated
+\kw{Transition-Output}:
+    \py{return} \self.dist
+\kw{Transition-Effect}:
+    \self.updated.append(\kw{to})
+
+\kw{Transition-Name}:
+    receive(m)
+\kw{Transition-Effect}:
+    act = m + \self.weights[\kw{fr}]
+    \py{if} \self.dist \py{is} \pyval{None} \py{or} act < \self.dist:
+        \self.dist = act
+	\self.parent = \kw{fr}
+        \self.updated = []
+
+\kw{Tasks}:
+    send(m)
+\endgroup
+\end{framed}
+\caption{Simio description of Bellman-Ford}
+\end{figure}
+
+We note that the code reads very similar to a formal I/O automaton
+specification, which is one of Simio's goals. Simio now takes such an automaton
+specification and parses it into an executable Python module, which is then
+used by the simulator to run multiple nodes connected in a network.
+
+\section{Simulation}
+
+Cody.
+
+\section{Related work}
+
+{\color{red}Progress marker}
+
+Of particular note in terms of related work are the
+\href{http://groups.csail.mit.edu/tds/ioa/}{IOA Language and Toolset}, which
+simulates the behaviour of a single I/O automata, and the
+\href{http://www.veromodo.com/}{Tempo Toolset}, which simulates a single
+*timed* I/O automata. These tools provide the user with a domain-specific
+language for describing automata, as well as tools for simulating the operation
+of a single automata, doing invariant checking, verifying liveness and safety
+properties, and generating code.
+
+While these both provide authors of automata with powerful tools for verifying
+the correctness of their algorithms, they are not particularly useful for
+users who want to study the behaviour of an automata so as to better understand
+the underlying algorithm. In particular, we envision that students who are
+being introduced to reasoning about distributed systems using I/O automata for
+the first time, or seasoned researchers toying with an idea for a new
+algorithm, would benefit greatly from being able to see how a network of nodes
+behaves when running a specific algorithm. Furthermore, we believe that, by
+allowing the user to specify the network graph they are interested in, they can
+quickly explore corner cases that they suspect might be difficult for the
+algorithm, or they can improve their understanding of the algorithm by
+observing its behaviour in very different network topologies.
+
+Another reason why we feel existing solutions are insufficient is that they
+require the user to learn a new programming language simply to be able to type
+up an algorithm. Instead, we propose to provide the user with the ability to
+define their automata using the high-level programming language Python, which
+many computer scientists are already familiar with. State variables will be
+represented as Python variables, giving the user access to the suite of
+primitive types and classes provided by Python and its many third-party
+modules, without having to implement all these types ourselves. In the same
+vein, transitions will be specified as pure Python functions whose arguments
+are the current state variables, as well as any transition inputs, and whose
+return value will be the new state of the object. Modeling transitions this way
+allows us to give the full power of the Python language to the user, without
+incurring additional implementation cost for us.
+
+\section{Challenges}
+
+The flexibility of expression in our system means that doing formal verification
+or analysis of the automata becomes difficult. We surmise that this is the
+reason why previous work generally chose to implement a language from scratch;
+it gives them the opportunity to limit the language to only provide features
+that can be reasoned about using current program analysis techniques. We
+therefore position our simulator as a complement to existing tools, rather than
+as a replacement for them. In particular, we anticipate that users will first
+prototype their automata in our simulator to examine their behaviour, and then,
+once the algorithm has been sufficiently well refined, write their final
+automata specification using a specialized language such as Tempo so that
+formal methods can be used to prove properties of the final algorithm.
+
+\section{Project status}
+
+At this stage in the project's development, we have built rudimentary support
+for specifying automata, as well as a visualizing front-end that can display
+nodes in a network, as well as show communication between nodes. While these
+will both likely need further refinement, they are at the stage where we can
+now focus on building a working automata simulator. This simulator would first
+invoke the parser to get an executable version of the automata, construct and
+initialize several copies of the automata to correspond to each of the nodes in
+the simulated network, and link each automata as dictated by the network graph
+specification. Once this setup has been performed, it would then start
+executing the automata concurrently, ensuring fairness to each automata's task.
+The information about messages being sent and nodes changing state would then
+be communicated to the rendered in real-time, so that the visualization of the
+running algorithm can be produced.
+
+We anticipate that the biggest hurdle to making the simulator will be finding a
+good way of handling non-determinism in the simulated automata while still
+providing fairness. The reason for this is that a user may wish to bias the
+non-determistic choices to force the algorithm to behave in a particular way.
+It is not obvious how this can be done in a way that is both easy for the user,
+and, at the same time, does not get in the way of the simulator ensuring that
+the overall execution remains fair.
+\end{document}

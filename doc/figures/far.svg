@@ -41,7 +41,7 @@
 <g id="edge7" class="edge"><title></title>
 <path fill="none" stroke="blue" d="M437.994,-326.284C477.819,-336.949 544.445,-351.181 588.17,-358.459"/>
 <polygon fill="blue" stroke="blue" points="587.791,-361.943 598.219,-360.07 588.899,-355.031 587.791,-361.943"/>
-<text text-anchor="middle" x="469.082" y="-345.771" font-family="Times,serif" font-size="12.00">11.0</text>
+<text text-anchor="middle" x="469.082" y="-345.771" font-family="Times,serif" font-size="12.00">11</text>
 </g>
 <!-- a2 -->
 <g id="node4" class="node"><title></title>
@@ -60,7 +60,7 @@
 <g id="edge8" class="edge"><title></title>
 <path fill="none" stroke="red" d="M396.071,-295.812C378.854,-268.404 340.147,-216.769 313.733,-185.417"/>
 <polygon fill="red" stroke="red" points="316.137,-182.843 306.971,-177.529 310.823,-187.399 316.137,-182.843"/>
-<text text-anchor="middle" x="345.402" y="-244.014" font-family="Times,serif" font-size="12.00">8.0</text>
+<text text-anchor="middle" x="345.402" y="-244.014" font-family="Times,serif" font-size="12.00">8</text>
 </g>
 <!-- a6&#45;&gt;a1 -->
 <g id="edge12" class="edge"><title></title>
@@ -85,7 +85,7 @@
 <g id="edge3" class="edge"><title></title>
 <path fill="none" stroke="red" d="M221.485,-443.563C264.148,-417.789 337.251,-368.436 376.984,-338.578"/>
 <polygon fill="red" stroke="red" points="379.572,-341.006 385.399,-332.157 375.326,-335.441 379.572,-341.006"/>
-<text text-anchor="middle" x="285.735" y="-394.47" font-family="Times,serif" font-size="12.00">12.0</text>
+<text text-anchor="middle" x="285.735" y="-394.47" font-family="Times,serif" font-size="12.00">12</text>
 </g>
 <!-- a4 -->
 <g id="node5" class="node"><title></title>
@@ -117,9 +117,9 @@
 </g>
 <!-- a9&#45;&gt;a5 -->
 <g id="edge19" class="edge"><title></title>
-<path fill="none" stroke="blue" d="M253.946,-159.588C220.416,-163.188 168.442,-171.61 131.756,-179.261"/>
-<polygon fill="blue" stroke="blue" points="130.883,-175.869 121.843,-181.394 132.355,-182.712 130.883,-175.869"/>
-<text text-anchor="middle" x="152.851" y="-159.825" font-family="Times,serif" font-size="12.00">3.0</text>
+<path fill="none" stroke="red" d="M253.946,-159.588C220.416,-163.188 168.442,-171.61 131.756,-179.261"/>
+<polygon fill="red" stroke="red" points="130.883,-175.869 121.843,-181.394 132.355,-182.712 130.883,-175.869"/>
+<text text-anchor="middle" x="183.351" y="-172.825" font-family="Times,serif" font-size="12.00">3</text>
 </g>
 <!-- a8 -->
 <g id="node9" class="node"><title></title>
@@ -149,7 +149,7 @@
 <g id="edge17" class="edge"><title></title>
 <path fill="none" stroke="red" d="M468.085,-62.0876C428.141,-79.7191 361.691,-113.271 321.367,-136.078"/>
 <polygon fill="red" stroke="red" points="319.375,-133.186 312.445,-141.2 322.86,-139.257 319.375,-133.186"/>
-<text text-anchor="middle" x="381.226" y="-102.483" font-family="Times,serif" font-size="12.00">20.0</text>
+<text text-anchor="middle" x="381.226" y="-102.483" font-family="Times,serif" font-size="12.00">20</text>
 </g>
 </g>
 </svg>

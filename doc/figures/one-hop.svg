@@ -104,8 +104,9 @@
 </g>
 <!-- a9&#45;&gt;a3 -->
 <g id="edge18" class="edge"><title></title>
-<path fill="none" stroke="gainsboro" d="M295.603,-177.581C312.821,-204.989 351.527,-256.624 377.941,-287.977"/>
-<polygon fill="gainsboro" stroke="gainsboro" points="375.537,-290.551 384.703,-295.864 380.852,-285.994 375.537,-290.551"/>
+<path fill="none" stroke="blue" d="M295.603,-177.581C312.821,-204.989 351.527,-256.624 377.941,-287.977"/>
+<polygon fill="blue" stroke="blue" points="375.537,-290.551 384.703,-295.864 380.852,-285.994 375.537,-290.551"/>
+<text text-anchor="middle" x="345.402" y="-244.014" font-family="Times,serif" font-size="12.00">3</text>
 </g>
 <!-- a5 -->
 <g id="node8" class="node"><title></title>
@@ -115,7 +116,7 @@
 <g id="edge19" class="edge"><title></title>
 <path fill="none" stroke="red" d="M253.946,-159.588C220.416,-163.188 168.442,-171.61 131.756,-179.261"/>
 <polygon fill="red" stroke="red" points="130.883,-175.869 121.843,-181.394 132.355,-182.712 130.883,-175.869"/>
-<text text-anchor="middle" x="183.351" y="-172.825" font-family="Times,serif" font-size="12.00">3.0</text>
+<text text-anchor="middle" x="183.351" y="-172.825" font-family="Times,serif" font-size="12.00">3</text>
 </g>
 <!-- a8 -->
 <g id="node9" class="node"><title></title>
@@ -125,7 +126,7 @@
 <g id="edge20" class="edge"><title></title>
 <path fill="none" stroke="blue" d="M320.499,-147.906C360.443,-130.274 426.894,-96.7228 467.217,-73.9155"/>
 <polygon fill="blue" stroke="blue" points="469.209,-76.8077 476.14,-68.7939 465.725,-70.7367 469.209,-76.8077"/>
-<text text-anchor="middle" x="353.858" y="-114.311" font-family="Times,serif" font-size="12.00">3.0</text>
+<text text-anchor="middle" x="353.858" y="-114.311" font-family="Times,serif" font-size="12.00">3</text>
 </g>
 <!-- a7&#45;&gt;a6 -->
 <g id="edge16" class="edge"><title></title>

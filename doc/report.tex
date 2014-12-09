@@ -157,7 +157,38 @@ used by the simulator to run multiple nodes connected in a network.
 
 \section{Simulation}
 
-Cody.
+Distributed algorithms are notoriously difficult to understand.
+Sometimes observing the behavior of an algorithm aides in understanding more
+than pseudo code or an informal description.
+To this end, Simio simulates distributed algorithms in order to demonstrate to
+the student the exact behavior of arbitrary algorithms in arbitrary network
+topologies.
+
+The simulator takes as input both the output of the parser and a description of
+a (directional) graph.
+This input is then used as follows.
+First, the simulator builds the simulation network where each node in the input
+graph represents an automaton of the type specified in the parser output.
+Each of these nodes is filled in which information available under the
+asynchronous I/O automata model such as graph neighbors and per-node unique
+identifier.
+Next, channels are inserted between each pair of nodes that are connected by an
+edge in the graph.
+Channels are also represented by a Simio specification and thus completely
+configurable.
+Finally, the simulator repeatedly executes exactly one enabled action at a time
+until no more enabled actions remain.
+
+The way in which the simulator chooses the next action to run (the
+``scheduler'') is an important part of the simulator.
+Consider a naive scheduler that simply executes automata actions in round-robin
+order.
+As it turns out, this scheduler cannot produce many valid executions of the
+system since the asynchronous I/O automata model places no constraints on how
+often the automata execute transitions relative to each other.
+In order to expose the user to as many valid executions as possible, Simio's
+scheduler is random -- any enabled action of any automaton may executed at any
+time.
 
 \section{Related work}
 

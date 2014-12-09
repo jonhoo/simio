@@ -30,3 +30,10 @@ slowing down the visualization.
 
 The simulator's `STDOUT` will contain anything printed inside the running
 automaton instances, while `STDERR` will contain messages from the simulator.
+
+## Quick demos
+
+To see quick demos, run `make`, and then run one of the scripts in the
+[examples/demos](examples/demos) directory. Demos for Bellman-Ford, Paxos,
+Peterson's leader-election algorithm, and Luby Maximal Independent Set are
+given.

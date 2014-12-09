@@ -1,0 +1,60 @@
+#
+# Abelian IO automata
+#
+
+Name:
+	Abelian
+
+Signature-Input:
+	receive(m)
+
+Signature-Output:
+	send(m) connect receive
+
+State:
+	import random
+	self.grains = random.randint(0, int((3/2.)*len(self.nbrs)))
+	print "%d has %d grains and %d nbrs" % (self.i, self.grains, len(self.nbrs))
+	self.sendq = {n: [] for n in self.nbrs}
+	if self.grains >= len(self.nbrs):
+		print "%d marked red" % (self.i)
+		mark("red")
+	else:
+		print "%d marked green" % (self.i)
+		mark("green")
+	label("%02d" % self.grains)
+
+Transition-Name:
+	fire
+Transition-Precondition:
+	if self.grains >= len(self.nbrs):
+		print("%d fires because %d >= %d" % (self.i, self.grains, len(self.nbrs)))
+	return self.grains >= len(self.nbrs)
+Transition-Effect:
+	for n in self.nbrs:
+		self.sendq[n].append(1)
+		self.grains -= 1
+	if self.grains < len(self.nbrs):
+		mark("green")
+	label("%02d" % self.grains)
+
+Transition-Name:
+	send(m)
+Transition-Precondition:
+	return len(self.sendq[to]) > 0
+Transition-Output:
+	return self.sendq[to][0]
+Transition-Effect:
+	self.sendq[to].pop(0)
+
+Transition-Name:
+	receive(m)
+Transition-Effect:
+	self.grains += m
+	if self.grains >= len(self.nbrs):
+		mark("red")
+	label("%02d" % self.grains)
+
+Tasks:
+	send(m)
+	fire

@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 
-import getopt
+import argparse
 import gv
 import random
 import sys
@@ -451,28 +451,17 @@ def maintest():
 
 if __name__ == '__main__':
 
-    trace = False
-    randid = False
-    graphfile = 'graph.gv'
-    lim=1000
-    st = 0.0
-
-    args = sys.argv[1:]
-    if args:
-        os, args = getopt.getopt(args, 'g:l:s:rt')
-        for o, a in os:
-            if o == '-g':
-                graphfile = a
-            if o == '-l':
-                lim = a
-            if o == '-t':
-                trace = True
-            if o == '-r':
-                randid = True
-            if o == '-s':
-                st = float(a)
-        if len(args) > 0:
-            print "Unknown trailing arguments: %s" % args
-
-    btest(graphfile, lim, st, randid, trace)
+    parser = argparse.ArgumentParser(description='Simulate the operation of a network of I/O automata.')
+    parser.add_argument('-g', '--graph', required=True,
+            help='Simulate the automaton operating on GRAPH')
+    parser.add_argument('-l', '--limit', type=int, default=1000,
+            help='Simulate for LIMIT steps')
+    parser.add_argument('-s', '--sleep', type=float, default=0.0,
+            help='Sleep for this number of seconds between steps')
+    parser.add_argument('-r', '--random-ids', action='store_true',
+            help='Randomize the ID of each simulated node')
+    parser.add_argument('-t', '--trace', action='store_true',
+            help='Keep all intermediary step visualizations')
+    args = parser.parse_args()
+    btest(args.graph, args.limit, args.sleep, args.random_ids, args.trace)
     #maintest()

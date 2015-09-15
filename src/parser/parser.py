@@ -136,6 +136,7 @@ class Parser:
         print '\t\tself.nbrs = []'
         print '\t\tself.markcb = None'
         print '\t\tself.emarkcb = None'
+        print '\t\tself.labelcb = None'
         print
         print '\tdef init(self):'
         print '\t\tN = self.N'

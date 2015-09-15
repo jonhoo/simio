@@ -47,4 +47,5 @@ the simulator.
 To run one of the included examples, call `make`, and then run one of
 the scripts in [`examples/demos`](examples/demos). Demos for
 Bellman-Ford, Paxos, Peterson's leader-election algorithm, and Luby
-Maximal Independent Set are given.
+Maximal Independent Set are given. You might want to run the examples
+with `-s .2` so the simulation does not run too quickly.

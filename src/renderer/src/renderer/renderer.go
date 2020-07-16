@@ -15,7 +15,7 @@ import (
 
 	"container/list"
 
-	graphviz "code.google.com/p/gographviz"
+	graphviz "github.com/awalterschulze/gographviz"
 	shellwords "github.com/mattn/go-shellwords"
 )
 
@@ -30,12 +30,12 @@ const (
 func findEdge(network *graphviz.Graph, n1 string, n2 string) (uint, *graphviz.Edge) {
 	n1e := network.Edges.SrcToDsts[n1]
 	if n1e != nil && n1e[n2] != nil {
-		return 0, n1e[n2]
+		return 0, n1e[n2][0]
 	}
 
 	n2e := network.Edges.SrcToDsts[n2]
 	if n2e != nil && n2e[n1] != nil {
-		return 1, n2e[n1]
+		return 1, n2e[n1][0]
 	}
 
 	return 0, nil
@@ -278,7 +278,7 @@ func main() {
 	if e != nil {
 		panic(e)
 	}
-	network := graphviz.NewAnalysedGraph(tmpn).(*graphviz.Graph)
+	network, err := graphviz.NewAnalysedGraph(tmpn)
 	handle("erase", nil, network)
 
 	var start []*graphviz.Node
